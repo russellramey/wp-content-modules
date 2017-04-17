@@ -20,25 +20,42 @@
 .module-content{
     position: relative;
 }
-/* Module Sizes */
-.module-auto{
+/* Module Height */
+.module-content--height-auto{
 	padding: 0px 0;
 }
-.module-small{
+.module-content--height-small{
 	padding: 40px 0;
 }
-.module-medium{
+.module-content--height-medium{
 	padding: 80px 0;
 }
-.module-large{
+.module-content--height-large{
 	padding: 120px 0;
 }
-.module-xlarge{
+.module-content--height-xlarge{
 	padding: 200px 0;
 }
-/* Module Typography*/
-.bt-module h1{
-	margin-bottom:1rem;
+/* Module Content Width */
+.module-content--width-auto{
+	max-width: 100%;
+	margin: 0 auto;
+}
+.module-content--width-small{
+	max-width: 768px;
+	margin: 0 auto;
+}
+.module-content--width-medium{
+	max-width: 960px;
+	margin: 0 auto;
+}
+.module-content--width-large{
+	max-width: 1280px;
+	margin: 0 auto;
+}
+.module-content--width-xlarge{
+	max-width: 1440px;
+	margin: 0 auto;
 }
 /* Module Backgrounds */
 .module-wallpaper,

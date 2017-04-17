@@ -19,7 +19,7 @@ function load_module_css() {
 	// Plugin path
     $plugin_path = plugin_dir_url( __FILE__ );
     // Load styles to wp_head
-    wp_enqueue_style( 'modules', $plugin_path . 'css/modules-style.css' );
+    wp_enqueue_style( 'modules', $plugin_path . 'css/module-styles.css' );
 }
 
 
@@ -125,7 +125,7 @@ function module_metabox_setup() {
 	));
 	// Module Width Selector
 	$module_setup->add_field( array(
-	    'name'             => 'Module Inner Width',
+	    'name'             => 'Module Content Width',
 	    'desc'             => 'Option to constrain or expand the width of the inner content beyond the default container (default content width is 1170px)',
 	    'id'               => $prefix . 'module-content-width',
 	    'type'             => 'select',
@@ -137,7 +137,6 @@ function module_metabox_setup() {
 			'medium'   => __( 'Medium (960px)', 'cmb2' ),
 			'large'   => __( 'Large (1280px)', 'cmb2' ),
 			'xlarge'   => __( 'X Large (1440px)', 'cmb2' ),
-            'full-width'   => __( 'Full Width', 'cmb2' ),
 	    ),
 	));
 	// Module Height Selector
@@ -370,7 +369,7 @@ function module_insert_func( $atts, $content = null ) {
 	            <div class="module-overlay" style="background:linear-gradient(to <?php echo $module_overlay_direction; ?>, <?php echo $module_overlay_color_one; ?>, <?php echo $module_overlay_color_two; ?>); opacity:.<?php echo $module_overlay_opacity; ?>;"></div>
 	        <?php } ?>
 
-	        <div class="module-content <?php echo 'module-' . $module_height . ' ' . $module_content_width; ?> ">
+	        <div class="module-content <?php echo 'module-content--height-' . $module_height . ' module-content--width-' . $module_content_width; ?> ">
 	            <?php the_content(); ?>
 	        </div>
 	      </div>
