@@ -113,7 +113,7 @@ function module_metabox_setup() {
 	// Module Width Selector
 	$module_setup->add_field( array(
 	    'name'             => 'Module Outer Width',
-	    'desc'             => 'Select the width of the entire module<br />- Fixed (Module will flow inline with max width of parent content)<br />- Full (Module will fill width of screen, background and all)',
+	    'desc'             => 'Select the width of the entire module<br />- Auto (Module will flow inline with max width of parent container)<br />- Full Width (Module will fill width of viewport, background and all)',
 	    'id'               => $prefix . 'module-width',
 	    'type'             => 'select',
 	    'show_option_none' => false,
@@ -126,7 +126,12 @@ function module_metabox_setup() {
 	// Module Width Selector
 	$module_setup->add_field( array(
 	    'name'             => 'Module Content Width',
-	    'desc'             => 'Option to constrain or expand the width of the inner content beyond the default container (default content width is 1170px)',
+	    'desc'             => 'Option to constrain or expand the width of the inner content beyond the default container (default content width is 1170px)
+                               <br />- Auto (Module content will fill same width as "Module Outer Width" above)
+                               <br />- Small (Module content max width of 768px)
+                               <br />- Medium (Module content max width of 960px)
+                               <br />- Large (Module content max width of 1280px)
+                               <br />- X Large (Module content max width of 1440px)',
 	    'id'               => $prefix . 'module-content-width',
 	    'type'             => 'select',
 	    'show_option_none' => false,
@@ -141,8 +146,8 @@ function module_metabox_setup() {
 	));
 	// Module Height Selector
 	$module_setup->add_field( array(
-	    'name'             => 'Module Height',
-        'desc'             => 'Select the padding (height) for the top and bottom of the module content.',
+	    'name'             => 'Module Padding',
+        'desc'             => 'Select the padding for the <b>top</b> and <b>bottom</b> of the module content.',
 	    'id'               => $prefix . 'module-height',
 	    'type'             => 'select',
 	    'show_option_none' => false,
@@ -157,8 +162,8 @@ function module_metabox_setup() {
 	));
     // Module Spacing Selector
 	$module_setup->add_field( array(
-	    'name'             => 'Module Spacing',
-	    'desc'             => 'Select the margin (spacing) for the top and bottom of the module.',
+	    'name'             => 'Module Margin',
+	    'desc'             => 'Select the margin for the <b>top</b> and <b>bottom</b> of the module.',
 	    'id'               => $prefix . 'module-margin',
 	    'type'             => 'select',
 	    'show_option_none' => true,
@@ -185,21 +190,21 @@ function module_metabox_background() {
 	// Module background color 1
 	$module_background->add_field( array(
 		'name' => 'Background Color',
-		'description' => ' First color option (leave blank for default)',
+		'description' => 'Choose the background color of the module',
 		'id'   => $prefix . 'module-background-color',
 		'type' => 'colorpicker',
 	));
 	// Module background image
 	$module_background->add_field( array(
 		'name' => 'Background Image',
-		'description' => 'Use and image as the background<br />If image is added, it will be used as background and not the colors above',
+		'description' => 'Use and image as the background<br />If image is added, it will be used as background and not the colors above<br />This image will also be used as the backup background for video backgrounds below',
 		'id'   => $prefix . 'module-background-image',
 		'type'  => 'file',
 	));
 	// Module Width Selector
 	$module_background->add_field( array(
 	    'name'             => 'Background Video Source',
-	    'desc'             => 'Select the source of the video ID. This is required to source the correct video API for the ID above.',
+	    'desc'             => 'If you want to use a background video, select the source of the video ID.<br />This is required to source the correct video API for the ID above, if no source is choosen the video will not be shown - even with a supplied ID',
 	    'id'               => $prefix . 'module-background-video-source',
 	    'type'             => 'select',
 	    'show_option_none' => true,
@@ -211,7 +216,7 @@ function module_metabox_background() {
 	// Module background image
 	$module_background->add_field( array(
 		'name' => 'Background Video ID',
-		'description' => 'Use the youtube or viemo video ID here.',
+		'description' => 'Use the youtube or viemo video ID here.<br />Use the background image field above to set a fallback image for devices that do not support background videos (tablets and mobile)',
 		'id'   => $prefix . 'module-background-video',
 		'type'  => 'text',
 	));
