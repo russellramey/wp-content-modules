@@ -119,8 +119,8 @@ function module_metabox_setup() {
 	    'show_option_none' => false,
 	    'default'          => 'auto',
 	    'options'          => array(
-	        'bt-module--auto' => __( 'Auto', 'cmb2' ),
-	        'bt-module--full'   => __( 'Full Width', 'cmb2' ),
+	        'wp-module--auto' => __( 'Auto', 'cmb2' ),
+	        'wp-module--full'   => __( 'Full Width', 'cmb2' ),
 	    ),
 	));
 	// Module Width Selector
@@ -341,7 +341,7 @@ function module_insert_func( $atts, $content = null ) {
 
 
 	    // Module classes
-	    $module_classes = array('bt-module', $module_width);
+	    $module_classes = array('wp-module', $module_width);
 	    // OUTPUT HTML BELOW
 	    ?>
 

@@ -2,12 +2,11 @@
 *** Modules Styles
 ************************************************************************************/
 /* Modules */
-.bt-module{
+.wp-module{
 	position: relative;
 	overflow: hidden;
 }
-.bt-module--full,
-.full-width{
+.wp-module--full{
 	width: 100vw !important;
 	position: relative;
 	left: 50%;
