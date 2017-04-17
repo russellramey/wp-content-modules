@@ -85,3 +85,16 @@ function content_module() {
 	);
 	register_post_type( 'module', $args );
 } // End register post type
+
+
+/************************************************************************************
+*** Module Metaboxes
+	- Global options for the 'module' post type
+	- REQUIRES CMB2 Metabox library
+	  @link https://github.com/CMB2/CMB2
+************************************************************************************/
+// Check for CMB2 library
+// If CMB2 class doesn't exist, include it
+if( !class_exists("CMB2") ){
+    require_once( dirname(__FILE__)."/lib/cmb/init.php" );
+}
