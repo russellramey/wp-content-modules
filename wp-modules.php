@@ -324,6 +324,7 @@ function module_insert_func( $atts, $content = null ) {
 		// Setup
 	    $module_width = get_post_meta( get_the_ID(), '_cmb_module-width', true );
 	    $module_height = get_post_meta( get_the_ID(), '_cmb_module-height', true );
+        $module_margin = get_post_meta( get_the_ID(), '_cmb_module-margin', true );
 	    $module_content_width = get_post_meta( get_the_ID(), '_cmb_module-content-width', true );
 
 	    // Background
@@ -344,7 +345,7 @@ function module_insert_func( $atts, $content = null ) {
 	    // OUTPUT HTML BELOW
 	    ?>
 
-	    <div id="module-<?php the_ID(); ?>">
+	    <div id="module-<?php the_ID(); ?>" class="module-margin--<?php echo $module_margin; ?>">
 	    <div <?php post_class($module_classes); //WP Post Classes ?>>
 	        <?php
 	        // If Video or image or both
