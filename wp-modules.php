@@ -292,3 +292,98 @@ function module_output_code() {
 	echo '<p style="font-size:16px;">[module title="' . $post->post_name  . '"]</p>';
 	echo '<p><i>Copy this shortcode and paste it into any content type editor (ex. post or page)</i></p>';
 }
+
+
+/************************************************************************************
+*** Module Shortcode
+	Shortcode to display content module.
+
+	[module title=""]
+************************************************************************************/
+// Wordpress action hook
+add_shortcode( 'module', 'module_insert_func' );
+function module_insert_func( $atts, $content = null ) {
+	extract( shortcode_atts( array(
+		'title' => ''
+	), $atts ) );
+	ob_start(); ?>
+
+		<?php
+		// Find correct module
+		$module_args = array(
+				'post_type' => 'module',
+				'name' => $title,
+				'posts_per_page' => 1
+			);
+		// Get new query
+		$module = new WP_Query($module_args);
+		// If module found, show
+		if($module->have_posts()) {
+		$module->the_post();
+
+		// Get Module Meta
+		// Setup
+	    $module_width = get_post_meta( get_the_ID(), '_cmb_module-width', true );
+	    $module_height = get_post_meta( get_the_ID(), '_cmb_module-height', true );
+	    $module_content_width = get_post_meta( get_the_ID(), '_cmb_module-content-width', true );
+
+	    // Background
+	    $module_background_image = get_post_meta( get_the_ID(), '_cmb_module-background-image', true );
+	    $module_background_video = get_post_meta( get_the_ID(), '_cmb_module-background-video', true );
+	    $module_background_video_src = get_post_meta( get_the_ID(), '_cmb_module-background-video-source', true );
+	    $module_background_color = get_post_meta( get_the_ID(), '_cmb_module-background-color', true );
+
+	    // Overlay
+	    $module_overlay_color_one = get_post_meta( get_the_ID(), '_cmb_module-overlay-color-one', true );
+	    $module_overlay_color_two = get_post_meta( get_the_ID(), '_cmb_module-overlay-color-two', true );
+	    $module_overlay_opacity = get_post_meta( get_the_ID(), '_cmb_module-overlay-opacity', true );
+	    $module_overlay_direction = get_post_meta( get_the_ID(), '_cmb_module-overlay-direction', true );
+
+
+	    // Module classes
+	    $module_classes = array('bt-module', $module_width);
+	    // OUTPUT HTML BELOW
+	    ?>
+
+	    <div id="module-<?php the_ID(); ?>">
+	    <div <?php post_class($module_classes); //WP Post Classes ?>>
+	        <?php
+	        // If Video or image or both
+	        if($module_background_image != '' || $module_background_video_src != '')  {?>
+	            <div class="module-wallpaper" style="background: url(<?php echo $module_background_image; ?>)"></div>
+	            <?php
+	            // If video and src is YouTube
+	            if($module_background_video_src === 'youtube'){ ?>
+	                <div class="module-video">
+	                    <div class="video youtube" data-id="<?php echo $module_background_video; ?>"></div>
+	                </div>
+	            <?php } else if($module_background_video_src === 'vimeo') { ?>
+                    <div class="module-video">
+	                    <div class="video vimeo" data-id="<?php echo $module_background_video; ?>"></div>
+	                </div>
+                <?php } ?>
+	            <div class="module-overlay" style="background:linear-gradient(to <?php echo $module_overlay_direction; ?>, <?php echo $module_overlay_color_one; ?>, <?php echo $module_overlay_color_two; ?>); opacity:.<?php echo $module_overlay_opacity; ?>;"></div>
+
+
+	        <?php } else { ?>
+	            <div class="module-wallpaper" style="background:<?php echo $module_background_color; ?>"></div>
+	            <div class="module-overlay" style="background:linear-gradient(to <?php echo $module_overlay_direction; ?>, <?php echo $module_overlay_color_one; ?>, <?php echo $module_overlay_color_two; ?>); opacity:.<?php echo $module_overlay_opacity; ?>;"></div>
+	        <?php } ?>
+
+	        <div class="module-content <?php echo 'module-' . $module_height . ' ' . $module_content_width; ?> ">
+	            <?php the_content(); ?>
+	        </div>
+	      </div>
+	    </div>
+
+		<?php
+		// Reset Query
+		wp_reset_query();
+		wp_reset_postdata();
+
+		// Clean output
+		$content_module = ob_get_clean();
+		// Return module
+		return $content_module;
+	}
+}
