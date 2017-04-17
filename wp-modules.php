@@ -95,7 +95,7 @@ function content_module() {
 ************************************************************************************/
 // Check for CMB2 library
 // If CMB2 class doesn't exist, include it
-if( !class_exists("CMB2") ){
+if( !class_exists('CMB2') ){
     require_once( dirname(__FILE__)."/lib/cmb/init.php" );
 }
 
