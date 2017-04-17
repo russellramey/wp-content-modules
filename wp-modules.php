@@ -387,3 +387,82 @@ function module_insert_func( $atts, $content = null ) {
 		return $content_module;
 	}
 }
+
+
+/************************************************************************************
+*** Javascript
+	Use YouTube and Viemo APIs to build player dynamicly.
+    Load this script in wp_footer
+************************************************************************************/
+// Add action hook
+add_action( 'wp_footer', 'load_module_scripts' );
+// Load javascript
+function load_module_scripts() {
+
+    global $post;
+    if( is_a( $post, 'WP_Post' ) && has_shortcode( $post->post_content, 'module') ) {
+    ?>
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script type="text/javascript">
+        function onYouTubeIframeAPIReady() {
+            // Get list of all player containers
+            var players = document.querySelectorAll('.youtube');
+            // For each player, create YT player
+            for (var p = 0; p < players.length; p++){
+                // New player
+                new YT.Player(players[p], {
+                    // YouTube Video ID
+                    videoId: players[p].dataset.id,
+                    // Player options
+                    playerVars: {
+                        // Auto-play the video on load
+                        playlist: players[p].dataset.id,
+                        autoplay: 1,
+                        // Show related videos
+                        rel: 0,
+                        // Show pause/play buttons in player
+                        controls: 0,
+                        // Hide the video title
+                        showinfo: 0,
+                        // Hide the Youtube Logo
+                        modestbranding: 1,
+                        // Run the video in a loop
+                        loop: 1,
+                        // Hide the full screen button
+                        fs: 0,
+                        // Hide closed captions
+                        cc_load_policty: 0,
+                        // Hide the Video Annotations
+                        iv_load_policy: 3,
+                        // Hide video controls when playing
+                        autohide: 0,
+                        html5: 1
+                    },
+                    events: {
+                        onReady: function(e) {
+                        e.target.mute();
+                        }
+                    }
+
+                });
+            }
+        }
+    </script>
+
+    <script src="https://player.vimeo.com/api/player.js"></script>
+    <script>
+        // Get list of all player containers
+        var players = document.querySelectorAll('.vimeo');
+        for (var p = 0; p < players.length; p++){
+            var options = {
+                id: players[p].dataset.id,
+                loop: true,
+                autoplay: true
+            };
+
+            var player = new Vimeo.Player(players[p], options);
+            player.setVolume(0);
+        }
+    </script>
+
+<?php } }
