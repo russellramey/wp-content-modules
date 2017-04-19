@@ -81,7 +81,7 @@ function content_module() {
 		'publicly_queryable'    => true,
 		'rewrite'               => false,
 		'capability_type'       => 'post',
-		'show_in_rest'          => false,
+		'show_in_rest'          => true,
 	);
 	register_post_type( 'module', $args );
 } // End register post type
@@ -321,7 +321,7 @@ function module_insert_func( $atts, $content = null ) {
 			);
 		// Get new query
 		$module = new WP_Query($module_args);
-		// If module found, show
+		// If module found
 		if($module->have_posts()) {
 		$module->the_post();
 
@@ -331,19 +331,16 @@ function module_insert_func( $atts, $content = null ) {
 	    $module_height = get_post_meta( get_the_ID(), '_cmb_module-height', true );
         $module_margin = get_post_meta( get_the_ID(), '_cmb_module-margin', true );
 	    $module_content_width = get_post_meta( get_the_ID(), '_cmb_module-content-width', true );
-
 	    // Background
 	    $module_background_image = get_post_meta( get_the_ID(), '_cmb_module-background-image', true );
 	    $module_background_video = get_post_meta( get_the_ID(), '_cmb_module-background-video', true );
 	    $module_background_video_src = get_post_meta( get_the_ID(), '_cmb_module-background-video-source', true );
 	    $module_background_color = get_post_meta( get_the_ID(), '_cmb_module-background-color', true );
-
 	    // Overlay
 	    $module_overlay_color_one = get_post_meta( get_the_ID(), '_cmb_module-overlay-color-one', true );
 	    $module_overlay_color_two = get_post_meta( get_the_ID(), '_cmb_module-overlay-color-two', true );
 	    $module_overlay_opacity = get_post_meta( get_the_ID(), '_cmb_module-overlay-opacity', true );
 	    $module_overlay_direction = get_post_meta( get_the_ID(), '_cmb_module-overlay-direction', true );
-
 
 	    // Module classes
 	    $module_classes = array('wp-module', $module_width);
@@ -351,34 +348,24 @@ function module_insert_func( $atts, $content = null ) {
 	    ?>
 
 	    <div id="module-<?php the_ID(); ?>" class="module-margin--<?php echo $module_margin; ?>">
-	    <div <?php post_class($module_classes); //WP Post Classes ?>>
-	        <?php
-	        // If Video or image or both
-	        if($module_background_image != '' || $module_background_video_src != '')  {?>
-	            <div class="module-wallpaper" style="background: url(<?php echo $module_background_image; ?>)"></div>
-	            <?php
-	            // If video and src is YouTube
-	            if($module_background_video_src === 'youtube'){ ?>
-	                <div class="module-video">
-	                    <div class="video youtube" data-id="<?php echo $module_background_video; ?>"></div>
-	                </div>
-	            <?php } else if($module_background_video_src === 'vimeo') { ?>
+    	    <div <?php post_class($module_classes); //WP Post Classes ?>>
+                <div class="module-wallpaper" style="background:<?php echo $module_background_color; ?>; background: url(<?php echo $module_background_image; ?>)"></div>
+
+                <?php
+    	        // If Video
+    	        if($module_background_video_src != '')  { ?>
                     <div class="module-video">
-	                    <div class="video vimeo" data-id="<?php echo $module_background_video; ?>"></div>
-	                </div>
+                        <div class="video <?php echo $module_background_video_src; ?>" data-id="<?php echo $module_background_video; ?>"></div>
+                    </div>
                 <?php } ?>
-	            <div class="module-overlay" style="background:linear-gradient(to <?php echo $module_overlay_direction; ?>, <?php echo $module_overlay_color_one; ?>, <?php echo $module_overlay_color_two; ?>); opacity:.<?php echo $module_overlay_opacity; ?>;"></div>
 
+                <div class="module-overlay" style="background:#<?php echo $module_overlay_color_one; ?>; background:linear-gradient(to <?php echo $module_overlay_direction; ?>, <?php echo $module_overlay_color_one; ?>, <?php echo $module_overlay_color_two; ?>); opacity:.<?php echo $module_overlay_opacity; ?>;"></div>
 
-	        <?php } else { ?>
-	            <div class="module-wallpaper" style="background:<?php echo $module_background_color; ?>"></div>
-	            <div class="module-overlay" style="background:linear-gradient(to <?php echo $module_overlay_direction; ?>, <?php echo $module_overlay_color_one; ?>, <?php echo $module_overlay_color_two; ?>); opacity:.<?php echo $module_overlay_opacity; ?>;"></div>
-	        <?php } ?>
+    	        <div class="module-content <?php echo 'module-content--height-' . $module_height . ' module-content--width-' . $module_content_width; ?> ">
+    	            <?php the_content(); ?>
+    	        </div>
 
-	        <div class="module-content <?php echo 'module-content--height-' . $module_height . ' module-content--width-' . $module_content_width; ?> ">
-	            <?php the_content(); ?>
-	        </div>
-	      </div>
+    	    </div>
 	    </div>
 
 		<?php
@@ -403,9 +390,10 @@ function module_insert_func( $atts, $content = null ) {
 add_action( 'wp_footer', 'load_module_scripts' );
 // Load javascript
 function load_module_scripts() {
-
+    // Global posts
     global $post;
-    if( is_a( $post, 'WP_Post' ) && has_shortcode( $post->post_content, 'module') ) {
+    // If is post, is module, and has shortcode [module]
+    if( is_a( $post, 'WP_Post' ) && has_shortcode( $post->post_content, 'module') || get_post_type() === 'module' ) {
     ?>
     <script src="https://www.youtube.com/iframe_api"></script>
     <script type="text/javascript">
@@ -458,16 +446,49 @@ function load_module_scripts() {
     <script>
         // Get list of all player containers
         var players = document.querySelectorAll('.vimeo');
+        // For each player found
         for (var p = 0; p < players.length; p++){
+            // Set player options
             var options = {
+                // Video ID
                 id: players[p].dataset.id,
+                // Loop video
                 loop: true,
+                // Autoplay
                 autoplay: true
             };
-
+            // Create player
             var player = new Vimeo.Player(players[p], options);
+            // Mute player
             player.setVolume(0);
         }
     </script>
 
 <?php } }
+
+
+/************************************************************************************
+*** Single View (Preview)
+	Set custom single view template for Module post type.
+************************************************************************************/
+// Add action hook
+add_filter( 'single_template', 'module_preview_template' );
+// Register function
+function module_preview_template($single_template) {
+    // Global posts
+     global $post;
+    // If Module post type
+    if ($post->post_type == 'module' ) {
+        $single_template = dirname( __FILE__ ) . '/wp-module-preview.php';
+    }
+    // Return template
+    return $single_template;
+    // Reset post data
+    wp_reset_postdata();
+}
+
+
+register_rest_field( 'module', 'metadata', array(
+    'get_callback' => function ( $data ) {
+        return get_post_meta( $data['id'], '', '' );
+    }, ));
