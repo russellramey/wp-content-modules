@@ -114,7 +114,7 @@ function module_metabox_setup() {
 	$module_setup->add_field( array(
 	    'name'             => 'Module Outer Width',
 	    'desc'             => 'Select the width of the entire module<br />- Auto (Module will flow inline with max width of parent container)<br />- Full Width (Module will fill width of viewport, background and all)',
-	    'id'               => $prefix . 'module-width',
+	    'id'               => $prefix . 'module_width',
 	    'type'             => 'select',
 	    'show_option_none' => false,
 	    'default'          => 'auto',
@@ -132,7 +132,7 @@ function module_metabox_setup() {
                                <br />- Medium (Module content max width of 960px)
                                <br />- Large (Module content max width of 1280px)
                                <br />- X Large (Module content max width of 1440px)',
-	    'id'               => $prefix . 'module-content-width',
+	    'id'               => $prefix . 'module_content_width',
 	    'type'             => 'select',
 	    'show_option_none' => false,
 	    'default'          => 'auto',
@@ -148,7 +148,7 @@ function module_metabox_setup() {
 	$module_setup->add_field( array(
 	    'name'             => 'Module Padding',
         'desc'             => 'Select the padding for the <b>top</b> and <b>bottom</b> of the module content.',
-	    'id'               => $prefix . 'module-height',
+	    'id'               => $prefix . 'module_height',
 	    'type'             => 'select',
 	    'show_option_none' => false,
 	    'default'          => 'auto',
@@ -164,7 +164,7 @@ function module_metabox_setup() {
 	$module_setup->add_field( array(
 	    'name'             => 'Module Margin',
 	    'desc'             => 'Select the margin for the <b>top</b> and <b>bottom</b> of the module.',
-	    'id'               => $prefix . 'module-margin',
+	    'id'               => $prefix . 'module_margin',
 	    'type'             => 'select',
 	    'show_option_none' => true,
 	    'options'          => array(
@@ -191,21 +191,21 @@ function module_metabox_background() {
 	$module_background->add_field( array(
 		'name' => 'Background Color',
 		'description' => 'Choose the background color of the module',
-		'id'   => $prefix . 'module-background-color',
+		'id'   => $prefix . 'module_background_color',
 		'type' => 'colorpicker',
 	));
 	// Module background image
 	$module_background->add_field( array(
 		'name' => 'Background Image',
 		'description' => 'Use and image as the background<br />If image is added, it will be used as background and not the colors above<br />This image will also be used as the backup background for video backgrounds below',
-		'id'   => $prefix . 'module-background-image',
+		'id'   => $prefix . 'module_background_image',
 		'type'  => 'file',
 	));
 	// Module Width Selector
 	$module_background->add_field( array(
 	    'name'             => 'Background Video Source',
 	    'desc'             => 'If you want to use a background video, select the source of the video ID.<br />This is required to source the correct video API for the ID above, if no source is choosen the video will not be shown - even with a supplied ID',
-	    'id'               => $prefix . 'module-background-video-source',
+	    'id'               => $prefix . 'module_background_video_source',
 	    'type'             => 'select',
 	    'show_option_none' => true,
 	    'options'          => array(
@@ -217,7 +217,7 @@ function module_metabox_background() {
 	$module_background->add_field( array(
 		'name' => 'Background Video ID',
 		'description' => 'Use the youtube or viemo video ID here.<br />Use the background image field above to set a fallback image for devices that do not support background videos (tablets and mobile)',
-		'id'   => $prefix . 'module-background-video',
+		'id'   => $prefix . 'module_background_video',
 		'type'  => 'text',
 	));
 }
@@ -228,7 +228,7 @@ function module_metabox_overlay() {
 	// Start with an underscore to hide fields from custom fields list
 	$prefix = '_cmb_';
 	$module_overlay = new_cmb2_box( array(
-		'id'            => $prefix . 'module-overlay',
+		'id'            => $prefix . 'module_overlay',
 		'title'         => __( 'Module Overlay', 'cmb2' ),
 		'object_types'  => array( 'module'), // Post type
 	));
@@ -237,21 +237,21 @@ function module_metabox_overlay() {
 	$module_overlay->add_field( array(
 		'name' => 'Overlay Color 1',
 		'description' => ' First color option (leave blank for default)',
-		'id'   => $prefix . 'module-overlay-color-one',
+		'id'   => $prefix . 'module_overlay_color_one',
 		'type' => 'colorpicker',
 	));
 	// Module Overlay color 2
 	$module_overlay->add_field( array(
 		'name' => 'Overlay Color 2',
 		'description' => ' Second color to make gradient (if none - first color will be used as overlay)',
-		'id'   => $prefix . 'module-overlay-color-two',
+		'id'   => $prefix . 'module_overlay_color_two',
 		'type' => 'colorpicker',
 	));
 	// Module Overlay Opacity
 	$module_overlay->add_field( array(
 	    'name'             => 'Overlay Opacity',
 	    'desc'             => 'Select the opacity of the overlay color/gradient (default is 50%)',
-	    'id'               => $prefix . 'module-overlay-opacity',
+	    'id'               => $prefix . 'module_overlay_opacity',
 	    'type'             => 'select',
 	    'show_option_none' => false,
 		'default'          => '5',
@@ -272,7 +272,7 @@ function module_metabox_overlay() {
 	$module_overlay->add_field( array(
 	    'name'             => 'Overlay Direction',
 	    'desc'             => 'Select the overlay gradient direction. Gradient flows from color 1 to color 2',
-	    'id'               => $prefix . 'module-overlay-direction',
+	    'id'               => $prefix . 'module_overlay_direction',
 	    'type'             => 'select',
 	    'show_option_none' => false,
 	    'default'          => 'right',
@@ -309,8 +309,7 @@ add_shortcode( 'module', 'module_insert_func' );
 function module_insert_func( $atts, $content = null ) {
 	extract( shortcode_atts( array(
 		'title' => ''
-	), $atts ) );
-	ob_start(); ?>
+	), $atts )); ob_start(); ?>
 
 		<?php
 		// Find correct module
@@ -325,43 +324,34 @@ function module_insert_func( $atts, $content = null ) {
 		if($module->have_posts()) {
 		$module->the_post();
 
-		// Get Module Meta
-		// Setup
-	    $module_width = get_post_meta( get_the_ID(), '_cmb_module-width', true );
-	    $module_height = get_post_meta( get_the_ID(), '_cmb_module-height', true );
-        $module_margin = get_post_meta( get_the_ID(), '_cmb_module-margin', true );
-	    $module_content_width = get_post_meta( get_the_ID(), '_cmb_module-content-width', true );
-	    // Background
-	    $module_background_image = get_post_meta( get_the_ID(), '_cmb_module-background-image', true );
-	    $module_background_video = get_post_meta( get_the_ID(), '_cmb_module-background-video', true );
-	    $module_background_video_src = get_post_meta( get_the_ID(), '_cmb_module-background-video-source', true );
-	    $module_background_color = get_post_meta( get_the_ID(), '_cmb_module-background-color', true );
-	    // Overlay
-	    $module_overlay_color_one = get_post_meta( get_the_ID(), '_cmb_module-overlay-color-one', true );
-	    $module_overlay_color_two = get_post_meta( get_the_ID(), '_cmb_module-overlay-color-two', true );
-	    $module_overlay_opacity = get_post_meta( get_the_ID(), '_cmb_module-overlay-opacity', true );
-	    $module_overlay_direction = get_post_meta( get_the_ID(), '_cmb_module-overlay-direction', true );
 
+        // Get all meta data
+        $meta = get_post_meta(get_the_ID());
+        // For each entry get the value if available
+        foreach ( $meta as $key => $value ) {
+            ${$key} = $value[0];
+            echo $key . ": " . $value[0];
+        }
 	    // Module classes
-	    $module_classes = array('wp-module', $module_width);
+	    $module_classes = array('wp-module', $_cmb_module_width);
 	    // OUTPUT HTML BELOW
 	    ?>
 
-	    <div id="module-<?php the_ID(); ?>" class="module-margin--<?php echo $module_margin; ?>">
+	    <div id="module-<?php the_ID(); ?>" class="module-margin--<?php echo isset($_cmb_module_margin) ? $_cmb_module_margin : ''; ?>">
     	    <div <?php post_class($module_classes); //WP Post Classes ?>>
-                <div class="module-wallpaper" style="background:<?php echo $module_background_color; ?>; background: url(<?php echo $module_background_image; ?>)"></div>
+                <div class="module-wallpaper" style="background:<?php echo isset($_cmb_module_background_color) ? $_cmb_module_background_color : '#ffffff'; ?>; background: url(<?php echo isset($_cmb_module_background_image) ? $_cmb_module_background_image : ''; ?>)"></div>
 
                 <?php
     	        // If Video
-    	        if($module_background_video_src != '')  { ?>
+    	        if(isset($_cmb_module_background_video_source))  { ?>
                     <div class="module-video">
-                        <div class="video <?php echo $module_background_video_src; ?>" data-id="<?php echo $module_background_video; ?>"></div>
+                        <div class="video <?php echo $_cmb_module_background_video_source; ?>" data-id="<?php echo $_cmb_module_background_video; ?>"></div>
                     </div>
                 <?php } ?>
 
-                <div class="module-overlay" style="background:#<?php echo $module_overlay_color_one; ?>; background:linear-gradient(to <?php echo $module_overlay_direction; ?>, <?php echo $module_overlay_color_one; ?>, <?php echo $module_overlay_color_two; ?>); opacity:.<?php echo $module_overlay_opacity; ?>;"></div>
+                <div class="module-overlay" style="background:#<?php echo isset($_cmb_module_overlay_color_one) ? $_cmb_module_overlay_color_one : ''; ?>; background:linear-gradient(to <?php echo isset($_cmb_module_overlay_direction) ? $_cmb_module_overlay_direction : ''; ?>, <?php echo isset($_cmb_module_overlay_color_one) ? $_cmb_module_overlay_color_one : ''; ?>, <?php echo isset($_cmb_module_overlay_color_two) ? $_cmb_module_overlay_color_two : ''; ?>); opacity:.<?php echo isset($_cmb_module_overlay_opacity) ? $_cmb_module_overlay_opacity : ''; ?>;"></div>
 
-    	        <div class="module-content <?php echo 'module-content--height-' . $module_height . ' module-content--width-' . $module_content_width; ?> ">
+    	        <div class="module-content <?php echo 'module-content--height-' . $_cmb_module_height . ' module-content--width-' . $_cmb_module_content_width; ?> ">
     	            <?php the_content(); ?>
     	        </div>
 
@@ -441,7 +431,6 @@ function load_module_scripts() {
             }
         }
     </script>
-
     <script src="https://player.vimeo.com/api/player.js"></script>
     <script>
         // Get list of all player containers
@@ -487,7 +476,10 @@ function module_preview_template($single_template) {
     wp_reset_postdata();
 }
 
-
+/************************************************************************************
+*** REST api
+	Allow meta data to be sent with REST api calls (allows modules to work with REST)
+************************************************************************************/
 register_rest_field( 'module', 'metadata', array(
     'get_callback' => function ( $data ) {
         return get_post_meta( $data['id'], '', '' );
