@@ -173,6 +173,19 @@ function module_metabox_setup() {
             'large' => __( 'Large (120px)', 'cmb2' ),
 	    ),
 	));
+	 // Module Spacing Selector
+	$module_setup->add_field( array(
+	    'name'             => 'Module Text Color',
+	    'desc'             => 'Select the default text color for the module.<br />(You can overirde text colors using the editor styles above - this option is used to set the base color.)',
+	    'id'               => $prefix . 'module_text_color',
+	    'type'             => 'select',
+	    'show_option_none' => false,
+	    'default'          => 'black',
+	    'options'          => array(
+	        'black'   => __( 'Dark', 'cmb2' ),
+	        'white' => __( 'Light', 'cmb2' ),
+	    ),
+	));
 }
 
 // Module background metabox
@@ -330,16 +343,15 @@ function module_insert_func( $atts, $content = null ) {
         // For each entry get the value if available
         foreach ( $meta as $key => $value ) {
             ${$key} = $value[0];
-            echo $key . ": " . $value[0];
         }
 	    // Module classes
 	    $module_classes = array('wp-module', $_cmb_module_width);
 	    // OUTPUT HTML BELOW
 	    ?>
 
-	    <div id="module-<?php the_ID(); ?>" class="module-margin--<?php echo isset($_cmb_module_margin) ? $_cmb_module_margin : ''; ?>">
+	    <div id="module-<?php the_ID(); ?>" class="module-margin--<?php echo isset($_cmb_module_margin) ? $_cmb_module_margin : ''; ?> module-text--<?php echo isset($_cmb_module_text_color) ? $_cmb_module_text_color : ''; ?>">
     	    <div <?php post_class($module_classes); //WP Post Classes ?>>
-                <div class="module-wallpaper" style="background:<?php echo isset($_cmb_module_background_color) ? $_cmb_module_background_color : '#ffffff'; ?>; background: url(<?php echo isset($_cmb_module_background_image) ? $_cmb_module_background_image : ''; ?>)"></div>
+                <div class="module-wallpaper" style="background:<?php echo isset($_cmb_module_background_color) ? $_cmb_module_background_color : '#ffffff'; ?>; <?php echo isset($_cmb_module_background_image) ? 'background: url(' . $_cmb_module_background_image . ')' : ''; ?>"></div>
 
                 <?php
     	        // If Video

@@ -18,22 +18,27 @@
 /* Module Content */
 .module-content{
     position: relative;
+    padding: 0 15px;
 }
 /* Module Height */
 .module-content--height-auto{
 	padding: 0px 0;
 }
 .module-content--height-small{
-	padding: 40px 0;
+	padding-top:40px;
+	padding-bottom:40px;
 }
 .module-content--height-medium{
-	padding: 80px 0;
+	padding-top:80px;
+	padding-bottom:80px;
 }
 .module-content--height-large{
-	padding: 120px 0;
+	padding-top:120px;
+	padding-bottom:120px;
 }
 .module-content--height-xlarge{
-	padding: 200px 0;
+	padding-top:180px;
+	padding-bottom:180px;
 }
 /* Module Content Width */
 .module-content--width-auto{
@@ -65,6 +70,27 @@
 }
 .module-margin--large{
 	margin: 120px 0;
+}
+/* Module Text */
+.module-text--black,
+.module-text--black h1,
+.module-text--black h2,
+.module-text--black h3,
+.module-text--black h4,
+.module-text--black h5,
+.module-text--black h6,
+.module-text--black p{
+	color: #000;
+}
+.module-text--white,
+.module-text--white h1,
+.module-text--white h2,
+.module-text--white h3,
+.module-text--white h4,
+.module-text--white h5,
+.module-text--white h6,
+.module-text--white p{
+	color: #fff;
 }
 /* Module Backgrounds */
 .module-wallpaper,
