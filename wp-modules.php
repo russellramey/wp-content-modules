@@ -298,17 +298,20 @@ function module_metabox_overlay() {
 	));
 }
 
-// Module shortcode metabox
+
+// Dispaly shortcode to copy
 add_action( 'add_meta_boxes', 'add_module_output' );
 function add_module_output() {
 	add_meta_box('module_output_code', 'How to use', 'module_output_code', 'module', 'side', 'default');
+
+    // The Event Location Metabox
+    function module_output_code() {
+    	global $post;
+    	echo '<p style="font-size:16px;">[module title="' . $post->post_name  . '"]</p>';
+    	echo '<p><i>Copy this shortcode and paste it into any content type editor (ex. post or page)</i></p>';
+    }
 }
-// The Event Location Metabox
-function module_output_code() {
-	global $post;
-	echo '<p style="font-size:16px;">[module title="' . $post->post_name  . '"]</p>';
-	echo '<p><i>Copy this shortcode and paste it into any content type editor (ex. post or page)</i></p>';
-}
+
 
 
 /************************************************************************************
