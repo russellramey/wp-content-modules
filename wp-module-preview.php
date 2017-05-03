@@ -39,7 +39,7 @@
 
     <div id="module-<?php the_ID(); ?>" class="module-margin--<?php echo $module_margin; ?>">
         <div <?php post_class($module_classes); //WP Post Classes ?>>
-            <div class="module-wallpaper" style="background:<?php echo $module_background_color; ?>; background: url(<?php echo $module_background_image; ?>)"></div>
+            <div class="module-wallpaper" style="background:<?php echo $module_background_color; ?>; background: url(<?php echo the_post_thumbnail_url('full'); ?>)"></div>
 
             <?php
             // If Video
@@ -53,6 +53,7 @@
 
             <div class="module-content <?php echo 'module-content--height-' . $module_height . ' module-content--width-' . $module_content_width; ?> ">
                 <?php the_content(); ?>
+                <?php  ?>
             </div>
 
         </div>

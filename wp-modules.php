@@ -21,6 +21,17 @@ function load_module_css() {
     // Load styles to wp_head
     wp_enqueue_style( 'modules', $plugin_path . 'css/module-styles.css' );
 }
+add_action( 'admin_enqueue_scripts', 'load_module_admin_css' );
+function load_module_admin_css() {
+	// Plugin path
+    $plugin_path = plugin_dir_url( __FILE__ );
+    // Load styles to wp_head
+    wp_enqueue_style( 'modules', $plugin_path . 'css/module-admin-styles.css' );
+    // Get color picker styles (defualt WP)
+    wp_enqueue_style( 'wp-color-picker');
+    // Get color picker function (defualt WP)
+    wp_enqueue_script( 'wp-color-picker');
+}
 
 
 /************************************************************************************
@@ -51,10 +62,10 @@ function content_module() {
 		'search_items'          => __( 'Search Module', 'text_domain' ),
 		'not_found'             => __( 'Not found', 'text_domain' ),
 		'not_found_in_trash'    => __( 'Not found in Trash', 'text_domain' ),
-		'featured_image'        => __( 'Featured Image', 'text_domain' ),
-		'set_featured_image'    => __( 'Set featured image', 'text_domain' ),
-		'remove_featured_image' => __( 'Remove featured image', 'text_domain' ),
-		'use_featured_image'    => __( 'Use as featured image', 'text_domain' ),
+		'featured_image'        => __( 'Background Image', 'text_domain' ),
+		'set_featured_image'    => __( 'Set background image', 'text_domain' ),
+		'remove_featured_image' => __( 'Remove background image', 'text_domain' ),
+		'use_featured_image'    => __( 'Use as background image', 'text_domain' ),
 		'insert_into_item'      => __( 'Insert into module', 'text_domain' ),
 		'uploaded_to_this_item' => __( 'Uploaded to this module', 'text_domain' ),
 		'items_list'            => __( 'Modules list', 'text_domain' ),
@@ -66,7 +77,7 @@ function content_module() {
 		'label'                 => __( 'Module', 'text_domain' ),
 		'description'           => __( 'Modular content block to be used as shortcode in other content types', 'text_domain' ),
 		'labels'                => $labels,
-		'supports'              => array( 'title', 'editor'),
+		'supports'              => array( 'title', 'editor', 'thumbnail'),
 		'hierarchical'          => false,
 		'public'                => false,
 		'show_ui'               => true,
@@ -85,7 +96,10 @@ function content_module() {
 	);
 	register_post_type( 'module', $args );
 } // End register post type
-
+add_filter( 'admin_post_thumbnail_html', 'add_featured_image_instruction');
+function add_featured_image_instruction( $content ) {
+    return $content .= '<p>Add a backgound image for the module here. This image will also function as the fallback background for the video background option.</p>';
+}
 
 /************************************************************************************
 *** Module Metaboxes
@@ -307,69 +321,48 @@ function wp_content_module_setup() {
 
     // Markup
     function wp_content_module_setup_markup($object) {
-    wp_nonce_field(basename(__FILE__), "meta-box-nonce"); ?>
-    <div class="clearfix">
+    wp_nonce_field(basename(__FILE__), "meta-box-nonce");
 
+    // Get all meta data
+    $meta = get_post_meta(get_the_ID());
+    // For each entry get the value if available
+    foreach ( $meta as $key => $value ) {
+        ${$key} = $value[0];
+    }
 
-        <div style="width:33.33333%; float:left;">
-            <label for="_module_width">Module width</label>
-            <select name="_module_width">
-                <?php
-                $option_values = array(
-                    "fixed" => "Auto",
-                    "full-width" => "Full Width",
-                );
-
-                foreach($option_values as $key => $value) {
-                    if($key === get_post_meta($object->ID, "_module_width", true)) { ?>
-                        <option selected value="<?php echo $key; ?>"><?php echo $value; ?></option>
+    // Start input markup
+    ?>
+    <script>
+    jQuery(document).ready(function($){
+        $('.color-picker').wpColorPicker();
+    });
+    </script>
+    <div class="wp-module--setup clearfix">
+        <div class="wp-module--meta-field">
+            <div class="wp-module--meta-field-label">
+                <p>Module outter width</p>
+            </div>
+            <div class="wp-module--meta-field-input">
+                <select name="_module_outer_width">
                     <?php
-                    } else { ?>
-                        <option value="<?php echo $key; ?>"><?php echo $value; ?></option>
-                <?php } } ?>
-            </select>
+                    // Set select options
+                    $option_values = array(
+                        "fixed" => "Auto",
+                        "full-width" => "Full Width",
+                    );
+                    // Get each key/value pair of select
+                    foreach($option_values as $metaKey => $metaValue) {
+                        if($metaKey === $_module_outer_width) { ?>
+                            <option selected value="<?php echo $metaKey; ?>"><?php echo $metaValue; ?></option>
+                        <?php
+                        } else { ?>
+                            <option value="<?php echo $metaKey; ?>"><?php echo $metaValue; ?></option>
+                    <?php } } ?>
+                </select>
+            <p class="wp-module--meta-field-desc">Select the width of the entire module<br />- Auto (Module will flow inline with max width of parent container)<br />- Full Width (Module will fill width of viewport, background and all)</p>
+            </div>
         </div>
-
-        <div style="width:33.33333%; float:left;">
-            <label for="meta-box-dropdown">Module width</label>
-            <select name="_module_width_two">
-                <?php
-                $option_values = array(
-                    "fixed" => "Auto",
-                    "full-width" => "Full Width",
-                );
-
-                foreach($option_values as $key => $value) {
-                    if($key === get_post_meta($object->ID, "_module_width_two", true)) { ?>
-                        <option selected value="<?php echo $key; ?>"><?php echo $value; ?></option>
-                    <?php
-                    } else { ?>
-                        <option value="<?php echo $key; ?>"><?php echo $value; ?></option>
-                <?php } } ?>
-            </select>
-        </div>
-
-        <div style="width:33.33333%; float:left;">
-            <label for="meta-box-dropdown">Module width</label>
-            <select name="_module_width_three">
-                <?php
-                $option_values = array(
-                    "fixed" => "Auto",
-                    "full-width" => "Full Width",
-                );
-
-                foreach($option_values as $key => $value) {
-                    if($key === get_post_meta($object->ID, "_module_width_three", true)) { ?>
-                        <option selected value="<?php echo $key; ?>"><?php echo $value; ?></option>
-                    <?php
-                    } else { ?>
-                        <option value="<?php echo $key; ?>"><?php echo $value; ?></option>
-                <?php } } ?>
-            </select>
-        </div>
-
-
-        </div>
+    </div>
     <?php }
 }
 
@@ -387,39 +380,18 @@ function wp_content_module_meta_save($post_id, $post, $update) {
     if("module" != $post->post_type)
         return $post_id;
 
-
-    /*
-    // If Module Width is set
-    if(isset($_POST["meta-box-dropdown"])) {
-        // Get meta value and sanatize
-        $meta_box_dropdown_value = sanitize_text_field($_POST["meta-box-dropdown"]);
-        // Update meta value in DB
-        update_post_meta($post_id, "meta-box-dropdown", $meta_box_dropdown_value);
-    }
-
-    // If Module Width is set
-    if(isset($_POST["_module_width"])) {
-        // Get meta value and sanatize
-        $meta_box_dropdown_value = sanitize_text_field($_POST["_module_width"]);
-        // Update meta value in DB
-        update_post_meta($post_id, "_module_width", $meta_box_dropdown_value);
-    }
-    */
+    // Get each meta option value
     foreach($_POST as $key => $value) {
-        if (strpos($key, '_module_') === 0) {
+        if (strpos($key, '_module_') === 0 && isset($key)) {
+
             // Get meta value and sanatize
             $userInput = sanitize_text_field($value);
             // Update meta value in DB
             update_post_meta($post_id, $key, $userInput);
+
         }
     }
-
-
 }
-
-
-
-
 
 // Dispaly shortcode to copy
 add_action( 'add_meta_boxes', 'add_module_output' );
