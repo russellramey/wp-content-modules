@@ -7,7 +7,7 @@
 * Author: Russell Ramey
 * Author URI: http://russellramey.me/
 */
-tet
+
 
 /************************************************************************************
 *** Module Styles
@@ -95,7 +95,7 @@ function content_module() {
 ************************************************************************************/
 // Check for CMB2 library
 // If CMB2 class doesn't exist, include it
-if( !class_exists('CMB2') ){
+/*if( !class_exists('CMB2') ){
     require_once( dirname(__FILE__)."/lib/cmb/init.php" );
 }
 
@@ -296,7 +296,129 @@ function module_metabox_overlay() {
 			'bottom'   => __( 'Bottom', 'cmb2' ),
 	    ),
 	));
+}*/
+
+
+// Module Setup
+add_action("add_meta_boxes", "wp_content_module_setup");
+function wp_content_module_setup() {
+    // Add setup box action
+    add_meta_box("wp_content_module_setup", "Module Setup", "wp_content_module_setup_markup", "module", "normal", "high", null);
+
+    // Markup
+    function wp_content_module_setup_markup($object) {
+    wp_nonce_field(basename(__FILE__), "meta-box-nonce"); ?>
+    <div class="clearfix">
+
+
+        <div style="width:33.33333%; float:left;">
+            <label for="_module_width">Module width</label>
+            <select name="_module_width">
+                <?php
+                $option_values = array(
+                    "fixed" => "Auto",
+                    "full-width" => "Full Width",
+                );
+
+                foreach($option_values as $key => $value) {
+                    if($key === get_post_meta($object->ID, "_module_width", true)) { ?>
+                        <option selected value="<?php echo $key; ?>"><?php echo $value; ?></option>
+                    <?php
+                    } else { ?>
+                        <option value="<?php echo $key; ?>"><?php echo $value; ?></option>
+                <?php } } ?>
+            </select>
+        </div>
+
+        <div style="width:33.33333%; float:left;">
+            <label for="meta-box-dropdown">Module width</label>
+            <select name="_module_width_two">
+                <?php
+                $option_values = array(
+                    "fixed" => "Auto",
+                    "full-width" => "Full Width",
+                );
+
+                foreach($option_values as $key => $value) {
+                    if($key === get_post_meta($object->ID, "_module_width_two", true)) { ?>
+                        <option selected value="<?php echo $key; ?>"><?php echo $value; ?></option>
+                    <?php
+                    } else { ?>
+                        <option value="<?php echo $key; ?>"><?php echo $value; ?></option>
+                <?php } } ?>
+            </select>
+        </div>
+
+        <div style="width:33.33333%; float:left;">
+            <label for="meta-box-dropdown">Module width</label>
+            <select name="_module_width_three">
+                <?php
+                $option_values = array(
+                    "fixed" => "Auto",
+                    "full-width" => "Full Width",
+                );
+
+                foreach($option_values as $key => $value) {
+                    if($key === get_post_meta($object->ID, "_module_width_three", true)) { ?>
+                        <option selected value="<?php echo $key; ?>"><?php echo $value; ?></option>
+                    <?php
+                    } else { ?>
+                        <option value="<?php echo $key; ?>"><?php echo $value; ?></option>
+                <?php } } ?>
+            </select>
+        </div>
+
+
+        </div>
+    <?php }
 }
+
+// Save All Metadata
+add_action("save_post", "wp_content_module_meta_save", 10, 3);
+function wp_content_module_meta_save($post_id, $post, $update) {
+    if (!isset($_POST["meta-box-nonce"]) || !wp_verify_nonce($_POST["meta-box-nonce"], basename(__FILE__)))
+        return $post_id;
+    if(!current_user_can("edit_post", $post_id))
+        return $post_id;
+    if(defined("DOING_AUTOSAVE") && DOING_AUTOSAVE)
+        return $post_id;
+
+    // If is not Content Module
+    if("module" != $post->post_type)
+        return $post_id;
+
+
+    /*
+    // If Module Width is set
+    if(isset($_POST["meta-box-dropdown"])) {
+        // Get meta value and sanatize
+        $meta_box_dropdown_value = sanitize_text_field($_POST["meta-box-dropdown"]);
+        // Update meta value in DB
+        update_post_meta($post_id, "meta-box-dropdown", $meta_box_dropdown_value);
+    }
+
+    // If Module Width is set
+    if(isset($_POST["_module_width"])) {
+        // Get meta value and sanatize
+        $meta_box_dropdown_value = sanitize_text_field($_POST["_module_width"]);
+        // Update meta value in DB
+        update_post_meta($post_id, "_module_width", $meta_box_dropdown_value);
+    }
+    */
+    foreach($_POST as $key => $value) {
+        if (strpos($key, '_module_') === 0) {
+            // Get meta value and sanatize
+            $userInput = sanitize_text_field($value);
+            // Update meta value in DB
+            update_post_meta($post_id, $key, $userInput);
+        }
+    }
+
+
+}
+
+
+
 
 
 // Dispaly shortcode to copy
