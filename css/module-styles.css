@@ -37,8 +37,12 @@
 	padding-bottom:120px;
 }
 .module-content--height-xlarge{
-	padding-top:180px;
-	padding-bottom:180px;
+	padding-top:160px;
+	padding-bottom:160px;
+}
+.module-content--height-xxlarge{
+	padding-top:200px;
+	padding-bottom:200px;
 }
 /* Module Content Width */
 .module-content--width-auto{

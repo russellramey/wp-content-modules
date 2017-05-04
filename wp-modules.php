@@ -96,6 +96,8 @@ function content_module() {
 	);
 	register_post_type( 'module', $args );
 } // End register post type
+
+// Add description to defalut Feature Image metabox
 add_filter( 'admin_post_thumbnail_html', 'add_featured_image_instruction');
 function add_featured_image_instruction( $content ) {
     return $content .= '<p>Add a backgound image for the module here. This image will also function as the fallback background for the video background option.</p>';
@@ -313,6 +315,10 @@ function module_metabox_overlay() {
 }*/
 
 
+
+
+
+
 // Module Setup
 add_action("add_meta_boxes", "wp_content_module_setup");
 function wp_content_module_setup() {
@@ -320,51 +326,325 @@ function wp_content_module_setup() {
     add_meta_box("wp_content_module_setup", "Module Setup", "wp_content_module_setup_markup", "module", "normal", "high", null);
 
     // Markup
-    function wp_content_module_setup_markup($object) {
-    wp_nonce_field(basename(__FILE__), "meta-box-nonce");
+    function wp_content_module_setup_markup() {
+        // WP Nonce Hook (required)
+        wp_nonce_field(basename(__FILE__), "meta-box-nonce");
 
-    // Get all meta data
-    $meta = get_post_meta(get_the_ID());
-    // For each entry get the value if available
-    foreach ( $meta as $key => $value ) {
-        ${$key} = $value[0];
-    }
+        // Get all available or previsouly set meta data
+        $meta = get_post_meta(get_the_ID());
+        // For each entry get the value if available
+        foreach ( $meta as $key => $value ) {
+            ${$key} = $value[0];
+        }
 
     // Start input markup
     ?>
-    <script>
-    jQuery(document).ready(function($){
-        $('.color-picker').wpColorPicker();
-    });
-    </script>
     <div class="wp-module--setup clearfix">
+        <!-- Module Width -->
         <div class="wp-module--meta-field">
             <div class="wp-module--meta-field-label">
-                <p>Module outter width</p>
+                <p>Module Width</p>
             </div>
             <div class="wp-module--meta-field-input">
-                <select name="_module_outer_width">
-                    <?php
-                    // Set select options
-                    $option_values = array(
-                        "fixed" => "Auto",
-                        "full-width" => "Full Width",
+                <?php
+                    // Set dropdown options
+                    $width_options = array(
+                        "wp-module--auto" => "Auto",
+                        "wp-module--full" => "Full Width",
                     );
-                    // Get each key/value pair of select
-                    foreach($option_values as $metaKey => $metaValue) {
-                        if($metaKey === $_module_outer_width) { ?>
-                            <option selected value="<?php echo $metaKey; ?>"><?php echo $metaValue; ?></option>
-                        <?php
-                        } else { ?>
-                            <option value="<?php echo $metaKey; ?>"><?php echo $metaValue; ?></option>
-                    <?php } } ?>
-                </select>
-            <p class="wp-module--meta-field-desc">Select the width of the entire module<br />- Auto (Module will flow inline with max width of parent container)<br />- Full Width (Module will fill width of viewport, background and all)</p>
+                    // Render dropdown options
+                    wp_content_module_select_input('_module_width', $width_options, isset($_module_width) ? $_module_width : null);
+                ?>
+                <p class="wp-module--meta-field-desc">Select the width of the entire module<br />- Auto (Module will flow inline with max width of parent container)<br />- Full Width (Module will fill width of viewport, background and all)</p>
             </div>
         </div>
+
+        <!-- Module Content Width -->
+        <div class="wp-module--meta-field">
+            <div class="wp-module--meta-field-label">
+                <p>Module Content Width</p>
+            </div>
+            <div class="wp-module--meta-field-input">
+                <?php
+                    // Set dropdown options
+                    $content_width_options = array(
+                        "auto" => "Auto",
+                        "small" => "Small (768px)",
+                        "medium" => "Medium (960px)",
+                        "large" => "Large (1170px)",
+                        "xlarge" => "X Large (1440px)",
+                    );
+                    // Render dropdown options
+                    wp_content_module_select_input('_module_content_width', $content_width_options, isset($_module_content_width) ? $_module_content_width : null);
+                ?>
+                <p class="wp-module--meta-field-desc">Option to set the width of the inner content within the module<br />- Auto (Module content will fill same width as "Module Outer Width" above)<br />- Small (Module content max width of 768px)<br />- Medium (Module content max width of 960px)<br />- Large (Module content max width of 1280px)<br />- X Large (Module content max width of 1440px)</p>
+            </div>
+        </div>
+
+        <!-- Module Padding -->
+        <div class="wp-module--meta-field">
+            <div class="wp-module--meta-field-label">
+                <p>Module Padding</p>
+            </div>
+            <div class="wp-module--meta-field-input">
+                <?php
+                    // Set dropdown options
+                    $padding_options = array(
+                        "auto" => "Auto",
+                        "small" => "Small (40px)",
+                        "medium" => "Medium (80px)",
+                        "large" => "Large (120px)",
+                        "xlarge" => "Larger (160px)",
+                        "xxlarge" => "Largest (200px)",
+                    );
+                    // Render dropdown options
+                    wp_content_module_select_input('_module_padding', $padding_options, isset($_module_padding) ? $_module_padding : null);
+                ?>
+                <p class="wp-module--meta-field-desc">Set the padding for the top and bottom of the module inner content (will affect total height of module)</p>
+            </div>
+        </div>
+
+        <!-- Module Margin -->
+        <div class="wp-module--meta-field">
+            <div class="wp-module--meta-field-label">
+                <p>Module Margin</p>
+            </div>
+            <div class="wp-module--meta-field-input">
+                <?php
+                    // Set dropdown options
+                    $margin_options = array(
+                        "none" => "None",
+                        "small" => "Small (40px)",
+                        "medium" => "Medium (80px)",
+                        "large" => "Large (120px)",
+                    );
+                    // Render dropdown options
+                    wp_content_module_select_input('_module_margin', $margin_options, isset($_module_margin) ? $_module_margin : null);
+                ?>
+                <p class="wp-module--meta-field-desc">Set the margin for the top and bottom of the module<br />(this will affect the spacing between the module and other content on the page)</p>
+            </div>
+        </div>
+
+        <!-- Module Text Color -->
+        <div class="wp-module--meta-field">
+            <div class="wp-module--meta-field-label">
+                <p>Module Text Color</p>
+            </div>
+            <div class="wp-module--meta-field-input">
+                <?php
+                    // Set dropdown options
+                    $color_options = array(
+                        "black" => "Dark",
+                        "white" => "Light",
+                    );
+                    // Render dropdown options
+                    wp_content_module_select_input('_module_text_color', $color_options, isset($_module_text_color) ? $_module_text_color : null);
+                ?>
+                <p class="wp-module--meta-field-desc">Select the default text color for the module.<br />(You can overirde text colors using the editor styles above - this option is used to set the base color/theme.)</p>
+            </div>
+        </div>
+
     </div>
+<?php }
+}
+
+
+
+// Module Background
+add_action("add_meta_boxes", "wp_content_module_overlay");
+function wp_content_module_overlay() {
+    // Add setup box action
+    add_meta_box("wp_content_module_overlay", "Module Overlay Options", "wp_content_module_overlay_markup", "module", "normal", "high", null);
+
+    // Markup
+    function wp_content_module_overlay_markup() {
+        // WP Nonce Hook (required)
+        wp_nonce_field(basename(__FILE__), "meta-box-nonce");
+
+        // Get all available or previsouly set meta data
+        $meta = get_post_meta(get_the_ID());
+        // For each entry get the value if available
+        foreach ( $meta as $key => $value ) {
+            ${$key} = $value[0];
+        }
+
+        // Start input markup
+        ?>
+        <script>
+            jQuery(document).ready(function($){
+            $('.color-picker').wpColorPicker();
+            });
+        </script>
+        <div class="wp-module--overlay clearfix">
+            <!-- Module Overlay Color 1 -->
+            <div class="wp-module--meta-field">
+                <div class="wp-module--meta-field-label">
+                    <p>Module Overlay Color 1</p>
+                </div>
+                <div class="wp-module--meta-field-input">
+                    <?php wp_content_module_text_input('_module_overlay_color_1', 'color-picker', isset($_module_overlay_color_1) ? $_module_overlay_color_1 : null); ?>
+                    <p class="wp-module--meta-field-desc">First color option for color overlay</p>
+                </div>
+            </div>
+            <!-- Module Overlay Color 1 -->
+            <div class="wp-module--meta-field">
+                <div class="wp-module--meta-field-label">
+                    <p>Module Overlay Color 2</p>
+                </div>
+                <div class="wp-module--meta-field-input">
+                    <?php wp_content_module_text_input('_module_overlay_color_2', 'color-picker', isset($_module_overlay_color_2) ? $_module_overlay_color_2 : null); ?>
+                    <p class="wp-module--meta-field-desc">Select a second overlay color to create a gradient<br />(leave blank to use <b>Overlay Color 1</b> for a solid color overlay)</p>
+                </div>
+            </div>
+            <!-- Module Overlay Opacity -->
+            <div class="wp-module--meta-field">
+                <div class="wp-module--meta-field-label">
+                    <p>Module Overlay Opacity</p>
+                </div>
+                <div class="wp-module--meta-field-input">
+                    <?php
+                        // Set dropdown options
+                        $opacity_options = array(
+                            null => "None",
+                            "90" => "90%",
+                            "80" => "80%",
+                            "70" => "70%",
+                            "60" => "60%",
+                            "50" => "50%",
+                            "40" => "40%",
+                            "30" => "30%",
+                            "20" => "20%",
+                            "10" => "10%",
+                        );
+                        // Render dropdown options
+                        wp_content_module_select_input('_module_overlay_opacity', $opacity_options, isset($_module_overlay_opacity) ? $_module_overlay_opacity : null);
+                    ?>
+                    <p class="wp-module--meta-field-desc">Select the opacity of the overlay color/gradient (default is 100%, no opacity)</p>
+                </div>
+            </div>
+            <!-- Module Overlay Direction -->
+            <div class="wp-module--meta-field">
+                <div class="wp-module--meta-field-label">
+                    <p>Module Overlay Direction</p>
+                </div>
+                <div class="wp-module--meta-field-input">
+                    <?php
+                        // Set dropdown options
+                        $direction_options = array(
+                            "left" => "Left",
+                            "right" => "Right",
+                            "top" => "Top",
+                            "bottom" => "Bottom",
+                        );
+                        // Render dropdown options
+                        wp_content_module_select_input('_module_overlay_direction', $direction_options, isset($_module_overlay_direction) ? $_module_overlay_direction : null);
+                    ?>
+                    <p class="wp-module--meta-field-desc">Select the overlay gradient direction. Gradient flows from <b>Overlyay Color 1</b> to <b>Overlay Color 2</b></p>
+                </div>
+            </div>
+        </div>
     <?php }
 }
+
+
+
+
+
+// Module Background
+add_action("add_meta_boxes", "wp_content_module_background");
+function wp_content_module_background() {
+    // Add setup box action
+    add_meta_box("wp_content_module_background", "Module Background Options", "wp_content_module_background_markup", "module", "normal", "high", null);
+
+    // Markup
+    function wp_content_module_background_markup() {
+        // WP Nonce Hook (required)
+        wp_nonce_field(basename(__FILE__), "meta-box-nonce");
+
+        // Get all available or previsouly set meta data
+        $meta = get_post_meta(get_the_ID());
+        // For each entry get the value if available
+        foreach ( $meta as $key => $value ) {
+            ${$key} = $value[0];
+        }
+
+        // Start html output
+        ?>
+        <div class="wp-module--background clearfix">
+            <!-- Module Background Color -->
+            <div class="wp-module--meta-field">
+                <div class="wp-module--meta-field-label">
+                    <p>Module Background Color</p>
+                </div>
+                <div class="wp-module--meta-field-input">
+                    <?php wp_content_module_text_input('_module_background_color', 'color-picker', isset($_module_background_color) ? $_module_background_color : null); ?>
+                    <p class="wp-module--meta-field-desc">Choose the background color of the module<br />(This color will be used as the fallback for background images and background videos - default is <b>White</b>)</p>
+                </div>
+            </div>
+
+            <!-- Module Video ID -->
+            <div class="wp-module--meta-field">
+                <div class="wp-module--meta-field-label">
+                    <p>Module Video ID</p>
+                </div>
+                <div class="wp-module--meta-field-input">
+                    <?php wp_content_module_text_input('_module_video_id', '', isset($_module_video_id) ? $_module_video_id : null); ?>
+                    <p class="wp-module--meta-field-desc">Use the youtube or viemo video ID here.<br />You can use the <b>Background Image</b> field to set a fallback image for devices that do not support background videos (like tablets and mobile)</p>
+                </div>
+            </div>
+
+
+            <!-- Module Video Source -->
+            <div class="wp-module--meta-field">
+                <div class="wp-module--meta-field-label">
+                    <p>Module Video Source</p>
+                </div>
+                <div class="wp-module--meta-field-input">
+                    <?php
+                        // Set dropdown options
+                        $video_options = array(
+                            null => 'None',
+                            "youtube" => "YouTube",
+                            "vimeo" => "Vimeo",
+                        );
+                        // Render dropdown options
+                        wp_content_module_select_input('_module_background_video_source', $video_options, isset($_module_background_video_source) ? $_module_background_video_source : null);
+                    ?>
+                    <p class="wp-module--meta-field-desc">If you want to use a background video, select the source of the video ID.<br />This is required to source the correct video API for the ID above, if no source is choosen the video will not be shown - even with a supplied ID</p>
+                </div>
+            </div>
+        </div>
+
+<?php }
+
+}
+
+
+
+
+
+// Metabox input generation
+// Generate select dropdown
+function wp_content_module_select_input($name, $options, $value) {
+    echo '<select name="'. $name . '">';
+    foreach($options as $metaKey => $metaValue) {
+        if($metaKey == $value) {
+            echo '<option selected value="' . $metaKey . '">' . $metaValue . '</option>';
+        } else {
+            echo '<option value="' . $metaKey . '">' . $metaValue . '</option>';
+        }
+    }
+    echo '</select>';
+}
+// Generate text input fields
+function wp_content_module_text_input($name, $class, $value) {
+    echo '<input class="' . $class . '" type="text" name="' . $name . '"  value="' . $value . '" />';
+}
+
+
+
+
+
 
 // Save All Metadata
 add_action("save_post", "wp_content_module_meta_save", 10, 3);
@@ -392,6 +672,14 @@ function wp_content_module_meta_save($post_id, $post, $update) {
         }
     }
 }
+
+
+
+
+
+
+
+
 
 // Dispaly shortcode to copy
 add_action( 'add_meta_boxes', 'add_module_output' );
