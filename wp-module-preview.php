@@ -9,7 +9,6 @@
 <body <?php body_class(); // WP body classes?>>
 <div class="container" style="max-width:1170px; margin:0 auto;">
 
-
     <?php
     // Get current module
     the_post();
@@ -20,7 +19,6 @@
     foreach ( $meta as $key => $value ) {
         ${$key} = $value[0];
     }
-
 
     // Module classes
     $module_classes = array('wp-module', $_module_width);

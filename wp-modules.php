@@ -517,6 +517,7 @@ function module_insert_func( $atts, $content = null ) {
 		<?php
 		// Reset Query
 		wp_reset_query();
+        // Reset Post Data
 		wp_reset_postdata();
 
 		// Clean output
@@ -539,6 +540,8 @@ function load_module_scripts() {
     global $post;
     // If is post, is module, and has shortcode [module]
     if( is_a( $post, 'WP_Post' ) && has_shortcode( $post->post_content, 'module') || get_post_type() === 'module' ) {
+
+    // Render script tags
     ?>
     <script src="https://www.youtube.com/iframe_api"></script>
     <script type="text/javascript">
