@@ -21,7 +21,17 @@ function load_module_css() {
     // Load styles to wp_head
     wp_enqueue_style( 'modules', $plugin_path . 'css/module-styles.css' );
 }
-
+add_action( 'admin_enqueue_scripts', 'load_module_admin_css' );
+function load_module_admin_css() {
+	// Plugin path
+    $plugin_path = plugin_dir_url( __FILE__ );
+    // Load styles to wp_head
+    wp_enqueue_style( 'modules', $plugin_path . 'css/module-admin-styles.css' );
+    // Get color picker styles (defualt WP)
+    wp_enqueue_style( 'wp-color-picker');
+    // Get color picker function (defualt WP)
+    wp_enqueue_script( 'wp-color-picker');
+}
 
 /************************************************************************************
 *** Module (Content Module)
@@ -51,10 +61,10 @@ function content_module() {
 		'search_items'          => __( 'Search Module', 'text_domain' ),
 		'not_found'             => __( 'Not found', 'text_domain' ),
 		'not_found_in_trash'    => __( 'Not found in Trash', 'text_domain' ),
-		'featured_image'        => __( 'Featured Image', 'text_domain' ),
-		'set_featured_image'    => __( 'Set featured image', 'text_domain' ),
-		'remove_featured_image' => __( 'Remove featured image', 'text_domain' ),
-		'use_featured_image'    => __( 'Use as featured image', 'text_domain' ),
+		'featured_image'        => __( 'Background Image', 'text_domain' ),
+		'set_featured_image'    => __( 'Set background image', 'text_domain' ),
+		'remove_featured_image' => __( 'Remove background image', 'text_domain' ),
+		'use_featured_image'    => __( 'Use as background image', 'text_domain' ),
 		'insert_into_item'      => __( 'Insert into module', 'text_domain' ),
 		'uploaded_to_this_item' => __( 'Uploaded to this module', 'text_domain' ),
 		'items_list'            => __( 'Modules list', 'text_domain' ),
@@ -66,7 +76,7 @@ function content_module() {
 		'label'                 => __( 'Module', 'text_domain' ),
 		'description'           => __( 'Modular content block to be used as shortcode in other content types', 'text_domain' ),
 		'labels'                => $labels,
-		'supports'              => array( 'title', 'editor'),
+		'supports'              => array( 'title', 'editor', 'thumbnail'),
 		'hierarchical'          => false,
 		'public'                => false,
 		'show_ui'               => true,
@@ -86,6 +96,11 @@ function content_module() {
 	register_post_type( 'module', $args );
 } // End register post type
 
+// Add description to defalut Feature Image metabox
+add_filter( 'admin_post_thumbnail_html', 'add_featured_image_instruction');
+function add_featured_image_instruction( $content ) {
+    return $content .= '<p>Add a backgound image for the module here. This image will also function as the fallback background for the video background option.</p>';
+}
 
 /************************************************************************************
 *** Module Metaboxes
@@ -93,212 +108,340 @@ function content_module() {
 	- REQUIRES CMB2 Metabox library
 	  @link https://github.com/CMB2/CMB2
 ************************************************************************************/
-// Check for CMB2 library
-// If CMB2 class doesn't exist, include it
-if( !class_exists('CMB2') ){
-    require_once( dirname(__FILE__)."/lib/cmb/init.php" );
+// Module Setup
+add_action("add_meta_boxes", "wp_content_module_setup");
+function wp_content_module_setup() {
+    // Add setup box action
+    add_meta_box("wp_content_module_setup", "Module Setup", "wp_content_module_setup_markup", "module", "normal", "high", null);
+
+    // Markup
+    function wp_content_module_setup_markup() {
+        // WP Nonce Hook (required)
+        wp_nonce_field(basename(__FILE__), "meta-box-nonce");
+
+        // Get all available or previsouly set meta data
+        $meta = get_post_meta(get_the_ID());
+        // For each entry get the value if available
+        foreach ( $meta as $key => $value ) {
+            ${$key} = $value[0];
+        }
+
+    // Start input markup
+    ?>
+    <div class="wp-module--setup clearfix">
+        <!-- Module Width -->
+        <div class="wp-module--meta-field">
+            <div class="wp-module--meta-field-label">
+                <p>Module Width</p>
+            </div>
+            <div class="wp-module--meta-field-input">
+                <?php
+                    // Set dropdown options
+                    $width_options = array(
+                        "wp-module--auto" => "Auto",
+                        "wp-module--full" => "Full Width",
+                    );
+                    // Render dropdown options
+                    wp_content_module_select_input('_module_width', $width_options, isset($_module_width) ? $_module_width : null);
+                ?>
+                <p class="wp-module--meta-field-desc">Select the width of the entire module<br />- Auto (Module will flow inline with max width of parent container)<br />- Full Width (Module will fill width of viewport, background and all)</p>
+            </div>
+        </div>
+
+        <!-- Module Content Width -->
+        <div class="wp-module--meta-field">
+            <div class="wp-module--meta-field-label">
+                <p>Module Content Width</p>
+            </div>
+            <div class="wp-module--meta-field-input">
+                <?php
+                    // Set dropdown options
+                    $content_width_options = array(
+                        "auto" => "Auto",
+                        "small" => "Small (768px)",
+                        "medium" => "Medium (960px)",
+                        "large" => "Large (1170px)",
+                        "xlarge" => "X Large (1440px)",
+                    );
+                    // Render dropdown options
+                    wp_content_module_select_input('_module_content_width', $content_width_options, isset($_module_content_width) ? $_module_content_width : null);
+                ?>
+                <p class="wp-module--meta-field-desc">Option to set the width of the inner content within the module<br />- Auto (Module content will fill same width as "Module Outer Width" above)<br />- Small (Module content max width of 768px)<br />- Medium (Module content max width of 960px)<br />- Large (Module content max width of 1280px)<br />- X Large (Module content max width of 1440px)</p>
+            </div>
+        </div>
+
+        <!-- Module Padding -->
+        <div class="wp-module--meta-field">
+            <div class="wp-module--meta-field-label">
+                <p>Module Padding</p>
+            </div>
+            <div class="wp-module--meta-field-input">
+                <?php
+                    // Set dropdown options
+                    $padding_options = array(
+                        "auto" => "Auto",
+                        "small" => "Small (40px)",
+                        "medium" => "Medium (80px)",
+                        "large" => "Large (120px)",
+                        "xlarge" => "Larger (160px)",
+                        "xxlarge" => "Largest (200px)",
+                    );
+                    // Render dropdown options
+                    wp_content_module_select_input('_module_padding', $padding_options, isset($_module_padding) ? $_module_padding : null);
+                ?>
+                <p class="wp-module--meta-field-desc">Set the padding for the top and bottom of the module inner content (will affect total height of module)</p>
+            </div>
+        </div>
+
+        <!-- Module Margin -->
+        <div class="wp-module--meta-field">
+            <div class="wp-module--meta-field-label">
+                <p>Module Margin</p>
+            </div>
+            <div class="wp-module--meta-field-input">
+                <?php
+                    // Set dropdown options
+                    $margin_options = array(
+                        "none" => "None",
+                        "small" => "Small (40px)",
+                        "medium" => "Medium (80px)",
+                        "large" => "Large (120px)",
+                    );
+                    // Render dropdown options
+                    wp_content_module_select_input('_module_margin', $margin_options, isset($_module_margin) ? $_module_margin : null);
+                ?>
+                <p class="wp-module--meta-field-desc">Set the margin for the top and bottom of the module<br />(this will affect the spacing between the module and other content on the page)</p>
+            </div>
+        </div>
+
+        <!-- Module Text Color -->
+        <div class="wp-module--meta-field">
+            <div class="wp-module--meta-field-label">
+                <p>Module Text Color</p>
+            </div>
+            <div class="wp-module--meta-field-input">
+                <?php
+                    // Set dropdown options
+                    $color_options = array(
+                        "black" => "Dark",
+                        "white" => "Light",
+                    );
+                    // Render dropdown options
+                    wp_content_module_select_input('_module_text_color', $color_options, isset($_module_text_color) ? $_module_text_color : null);
+                ?>
+                <p class="wp-module--meta-field-desc">Select the default text color for the module.<br />(You can overirde text colors using the editor styles above - this option is used to set the base color/theme.)</p>
+            </div>
+        </div>
+
+    </div>
+<?php }
 }
+// Module Background
+add_action("add_meta_boxes", "wp_content_module_overlay");
+function wp_content_module_overlay() {
+    // Add setup box action
+    add_meta_box("wp_content_module_overlay", "Module Overlay Options", "wp_content_module_overlay_markup", "module", "normal", "high", null);
 
-// Module setup metabox
-add_action( 'cmb2_init', 'module_metabox_setup' );
-function module_metabox_setup() {
-	// Start with an underscore to hide fields from custom fields list
-	$prefix = '_cmb_';
-	$module_setup = new_cmb2_box( array(
-		'id'            => $prefix . 'module_setup',
-		'title'         => __( 'Module Setup', 'cmb2' ),
-		'object_types'  => array( 'module'), // Post type
-	));
+    // Markup
+    function wp_content_module_overlay_markup() {
+        // WP Nonce Hook (required)
+        wp_nonce_field(basename(__FILE__), "meta-box-nonce");
 
-	// Module Width Selector
-	$module_setup->add_field( array(
-	    'name'             => 'Module Outer Width',
-	    'desc'             => 'Select the width of the entire module<br />- Auto (Module will flow inline with max width of parent container)<br />- Full Width (Module will fill width of viewport, background and all)',
-	    'id'               => $prefix . 'module_width',
-	    'type'             => 'select',
-	    'show_option_none' => false,
-	    'default'          => 'auto',
-	    'options'          => array(
-	        'wp-module--auto' => __( 'Auto', 'cmb2' ),
-	        'wp-module--full'   => __( 'Full Width', 'cmb2' ),
-	    ),
-	));
-	// Module Width Selector
-	$module_setup->add_field( array(
-	    'name'             => 'Module Content Width',
-	    'desc'             => 'Option to constrain or expand the width of the inner content beyond the default container (default content width is 1170px)
-                               <br />- Auto (Module content will fill same width as "Module Outer Width" above)
-                               <br />- Small (Module content max width of 768px)
-                               <br />- Medium (Module content max width of 960px)
-                               <br />- Large (Module content max width of 1280px)
-                               <br />- X Large (Module content max width of 1440px)',
-	    'id'               => $prefix . 'module_content_width',
-	    'type'             => 'select',
-	    'show_option_none' => false,
-	    'default'          => 'auto',
-        'options'          => array(
-	        'auto' => __( 'Auto', 'cmb2' ),
-	        'small'   => __( 'Small (768px)', 'cmb2' ),
-			'medium'   => __( 'Medium (960px)', 'cmb2' ),
-			'large'   => __( 'Large (1280px)', 'cmb2' ),
-			'xlarge'   => __( 'X Large (1440px)', 'cmb2' ),
-	    ),
-	));
-	// Module Height Selector
-	$module_setup->add_field( array(
-	    'name'             => 'Module Padding',
-        'desc'             => 'Select the padding for the <b>top</b> and <b>bottom</b> of the module content.',
-	    'id'               => $prefix . 'module_height',
-	    'type'             => 'select',
-	    'show_option_none' => false,
-	    'default'          => 'auto',
-	    'options'          => array(
-	        'auto' => __( 'Auto', 'cmb2' ),
-	        'small'   => __( 'Small (40px)', 'cmb2' ),
-			'medium'   => __( 'Medium (80px)', 'cmb2' ),
-			'large'   => __( 'Large (120px)', 'cmb2' ),
-			'xlarge'   => __( 'X Large (200px)', 'cmb2' ),
-	    ),
-	));
-    // Module Spacing Selector
-	$module_setup->add_field( array(
-	    'name'             => 'Module Margin',
-	    'desc'             => 'Select the margin for the <b>top</b> and <b>bottom</b> of the module.',
-	    'id'               => $prefix . 'module_margin',
-	    'type'             => 'select',
-	    'show_option_none' => true,
-	    'options'          => array(
-			'small' => __( 'Small (40px)', 'cmb2' ),
-	        'medium'   => __( 'Medium (80px)', 'cmb2' ),
-            'large' => __( 'Large (120px)', 'cmb2' ),
-	    ),
-	));
-	 // Module Spacing Selector
-	$module_setup->add_field( array(
-	    'name'             => 'Module Text Color',
-	    'desc'             => 'Select the default text color for the module.<br />(You can overirde text colors using the editor styles above - this option is used to set the base color.)',
-	    'id'               => $prefix . 'module_text_color',
-	    'type'             => 'select',
-	    'show_option_none' => false,
-	    'default'          => 'black',
-	    'options'          => array(
-	        'black'   => __( 'Dark', 'cmb2' ),
-	        'white' => __( 'Light', 'cmb2' ),
-	    ),
-	));
+        // Get all available or previsouly set meta data
+        $meta = get_post_meta(get_the_ID());
+        // For each entry get the value if available
+        foreach ( $meta as $key => $value ) {
+            ${$key} = $value[0];
+        }
+
+        // Start input markup
+        ?>
+        <script>
+            jQuery(document).ready(function($){
+            $('.color-picker').wpColorPicker();
+            });
+        </script>
+        <div class="wp-module--overlay clearfix">
+            <!-- Module Overlay Color 1 -->
+            <div class="wp-module--meta-field">
+                <div class="wp-module--meta-field-label">
+                    <p>Module Overlay Color 1</p>
+                </div>
+                <div class="wp-module--meta-field-input">
+                    <?php wp_content_module_text_input('_module_overlay_color_1', 'color-picker', isset($_module_overlay_color_1) ? $_module_overlay_color_1 : null); ?>
+                    <p class="wp-module--meta-field-desc">First color option for color overlay</p>
+                </div>
+            </div>
+            <!-- Module Overlay Color 1 -->
+            <div class="wp-module--meta-field">
+                <div class="wp-module--meta-field-label">
+                    <p>Module Overlay Color 2</p>
+                </div>
+                <div class="wp-module--meta-field-input">
+                    <?php wp_content_module_text_input('_module_overlay_color_2', 'color-picker', isset($_module_overlay_color_2) ? $_module_overlay_color_2 : null); ?>
+                    <p class="wp-module--meta-field-desc">Select a second overlay color to create a gradient<br />(leave blank to use <b>Overlay Color 1</b> for a solid color overlay)</p>
+                </div>
+            </div>
+            <!-- Module Overlay Opacity -->
+            <div class="wp-module--meta-field">
+                <div class="wp-module--meta-field-label">
+                    <p>Module Overlay Opacity</p>
+                </div>
+                <div class="wp-module--meta-field-input">
+                    <?php
+                        // Set dropdown options
+                        $opacity_options = array(
+                            null => "None",
+                            "90" => "90%",
+                            "80" => "80%",
+                            "70" => "70%",
+                            "60" => "60%",
+                            "50" => "50%",
+                            "40" => "40%",
+                            "30" => "30%",
+                            "20" => "20%",
+                            "10" => "10%",
+                        );
+                        // Render dropdown options
+                        wp_content_module_select_input('_module_overlay_opacity', $opacity_options, isset($_module_overlay_opacity) ? $_module_overlay_opacity : null);
+                    ?>
+                    <p class="wp-module--meta-field-desc">Select the opacity of the overlay color/gradient (default is 100%, no opacity)</p>
+                </div>
+            </div>
+            <!-- Module Overlay Direction -->
+            <div class="wp-module--meta-field">
+                <div class="wp-module--meta-field-label">
+                    <p>Module Overlay Direction</p>
+                </div>
+                <div class="wp-module--meta-field-input">
+                    <?php
+                        // Set dropdown options
+                        $direction_options = array(
+                            "left" => "Left",
+                            "right" => "Right",
+                            "top" => "Top",
+                            "bottom" => "Bottom",
+                        );
+                        // Render dropdown options
+                        wp_content_module_select_input('_module_overlay_direction', $direction_options, isset($_module_overlay_direction) ? $_module_overlay_direction : null);
+                    ?>
+                    <p class="wp-module--meta-field-desc">Select the overlay gradient direction. Gradient flows from <b>Overlyay Color 1</b> to <b>Overlay Color 2</b></p>
+                </div>
+            </div>
+        </div>
+    <?php }
 }
+// Module Background
+add_action("add_meta_boxes", "wp_content_module_background");
+function wp_content_module_background() {
+    // Add setup box action
+    add_meta_box("wp_content_module_background", "Module Background Options", "wp_content_module_background_markup", "module", "normal", "high", null);
 
-// Module background metabox
-add_action( 'cmb2_init', 'module_metabox_background' );
-function module_metabox_background() {
-	// Start with an underscore to hide fields from custom fields list
-	$prefix = '_cmb_';
-	$module_background = new_cmb2_box( array(
-		'id'            => $prefix . 'module_background',
-		'title'         => __( 'Module Background', 'cmb2' ),
-		'object_types'  => array( 'module'), // Post type
+    // Markup
+    function wp_content_module_background_markup() {
+        // WP Nonce Hook (required)
+        wp_nonce_field(basename(__FILE__), "meta-box-nonce");
 
-	));
+        // Get all available or previsouly set meta data
+        $meta = get_post_meta(get_the_ID());
+        // For each entry get the value if available
+        foreach ( $meta as $key => $value ) {
+            ${$key} = $value[0];
+        }
 
-	// Module background color 1
-	$module_background->add_field( array(
-		'name' => 'Background Color',
-		'description' => 'Choose the background color of the module',
-		'id'   => $prefix . 'module_background_color',
-		'type' => 'colorpicker',
-	));
-	// Module background image
-	$module_background->add_field( array(
-		'name' => 'Background Image',
-		'description' => 'Use and image as the background<br />If image is added, it will be used as background and not the colors above<br />This image will also be used as the backup background for video backgrounds below',
-		'id'   => $prefix . 'module_background_image',
-		'type'  => 'file',
-	));
-	// Module Width Selector
-	$module_background->add_field( array(
-	    'name'             => 'Background Video Source',
-	    'desc'             => 'If you want to use a background video, select the source of the video ID.<br />This is required to source the correct video API for the ID above, if no source is choosen the video will not be shown - even with a supplied ID',
-	    'id'               => $prefix . 'module_background_video_source',
-	    'type'             => 'select',
-	    'show_option_none' => true,
-	    'options'          => array(
-	        'youtube' => __( 'YouTube', 'cmb2' ),
-	        'vimeo'   => __( 'Vimeo', 'cmb2' ),
-	    ),
-	));
-	// Module background image
-	$module_background->add_field( array(
-		'name' => 'Background Video ID',
-		'description' => 'Use the youtube or viemo video ID here.<br />Use the background image field above to set a fallback image for devices that do not support background videos (tablets and mobile)',
-		'id'   => $prefix . 'module_background_video',
-		'type'  => 'text',
-	));
+        // Start html output
+        ?>
+        <div class="wp-module--background clearfix">
+            <!-- Module Background Color -->
+            <div class="wp-module--meta-field">
+                <div class="wp-module--meta-field-label">
+                    <p>Module Background Color</p>
+                </div>
+                <div class="wp-module--meta-field-input">
+                    <?php wp_content_module_text_input('_module_background_color', 'color-picker', isset($_module_background_color) ? $_module_background_color : null); ?>
+                    <p class="wp-module--meta-field-desc">Choose the background color of the module<br />(This color will be used as the fallback for background images and background videos - default is <b>White</b>)</p>
+                </div>
+            </div>
+
+            <!-- Module Video ID -->
+            <div class="wp-module--meta-field">
+                <div class="wp-module--meta-field-label">
+                    <p>Module Video ID</p>
+                </div>
+                <div class="wp-module--meta-field-input">
+                    <?php wp_content_module_text_input('_module_video_id', '', isset($_module_video_id) ? $_module_video_id : null); ?>
+                    <p class="wp-module--meta-field-desc">Use the youtube or viemo video ID here.<br />You can use the <b>Background Image</b> field to set a fallback image for devices that do not support background videos (like tablets and mobile)</p>
+                </div>
+            </div>
+
+
+            <!-- Module Video Source -->
+            <div class="wp-module--meta-field">
+                <div class="wp-module--meta-field-label">
+                    <p>Module Video Source</p>
+                </div>
+                <div class="wp-module--meta-field-input">
+                    <?php
+                        // Set dropdown options
+                        $video_options = array(
+                            null => 'None',
+                            "youtube" => "YouTube",
+                            "vimeo" => "Vimeo",
+                        );
+                        // Render dropdown options
+                        wp_content_module_select_input('_module_background_video_source', $video_options, isset($_module_background_video_source) ? $_module_background_video_source : null);
+                    ?>
+                    <p class="wp-module--meta-field-desc">If you want to use a background video, select the source of the video ID.<br />This is required to source the correct video API for the ID above, if no source is choosen the video will not be shown - even with a supplied ID</p>
+                </div>
+            </div>
+        </div>
+
+<?php }
+
 }
-
-// Module overlay metabox
-add_action( 'cmb2_init', 'module_metabox_overlay' );
-function module_metabox_overlay() {
-	// Start with an underscore to hide fields from custom fields list
-	$prefix = '_cmb_';
-	$module_overlay = new_cmb2_box( array(
-		'id'            => $prefix . 'module_overlay',
-		'title'         => __( 'Module Overlay', 'cmb2' ),
-		'object_types'  => array( 'module'), // Post type
-	));
-
-	// Module Overlay color 1
-	$module_overlay->add_field( array(
-		'name' => 'Overlay Color 1',
-		'description' => ' First color option (leave blank for default)',
-		'id'   => $prefix . 'module_overlay_color_one',
-		'type' => 'colorpicker',
-	));
-	// Module Overlay color 2
-	$module_overlay->add_field( array(
-		'name' => 'Overlay Color 2',
-		'description' => ' Second color to make gradient (if none - first color will be used as overlay)',
-		'id'   => $prefix . 'module_overlay_color_two',
-		'type' => 'colorpicker',
-	));
-	// Module Overlay Opacity
-	$module_overlay->add_field( array(
-	    'name'             => 'Overlay Opacity',
-	    'desc'             => 'Select the opacity of the overlay color/gradient (default is 50%)',
-	    'id'               => $prefix . 'module_overlay_opacity',
-	    'type'             => 'select',
-	    'show_option_none' => false,
-		'default'          => '5',
-	    'options'          => array(
-	        '99' => __( '100%', 'cmb2' ),
-	        '9'   => __( '90%', 'cmb2' ),
-			'8'   => __( '80%', 'cmb2' ),
-			'7'   => __( '70%', 'cmb2' ),
-			'6'   => __( '60%', 'cmb2' ),
-			'5'   => __( '50%', 'cmb2' ),
-			'4'   => __( '40%', 'cmb2' ),
-			'3'   => __( '30%', 'cmb2' ),
-			'2'   => __( '20%', 'cmb2' ),
-			'1'   => __( '10%', 'cmb2' ),
-	    ),
-	));
-	// Module Overlay direction
-	$module_overlay->add_field( array(
-	    'name'             => 'Overlay Direction',
-	    'desc'             => 'Select the overlay gradient direction. Gradient flows from color 1 to color 2',
-	    'id'               => $prefix . 'module_overlay_direction',
-	    'type'             => 'select',
-	    'show_option_none' => false,
-	    'default'          => 'right',
-	    'options'          => array(
-	        'right' => __( 'Right', 'cmb2' ),
-	        'left'   => __( 'Left', 'cmb2' ),
-			'top'   => __( 'Top', 'cmb2' ),
-			'bottom'   => __( 'Bottom', 'cmb2' ),
-	    ),
-	));
+// Metabox input generation
+// Generate select dropdown
+function wp_content_module_select_input($name, $options, $value) {
+    echo '<select name="'. $name . '">';
+    foreach($options as $metaKey => $metaValue) {
+        if($metaKey == $value) {
+            echo '<option selected value="' . $metaKey . '">' . $metaValue . '</option>';
+        } else {
+            echo '<option value="' . $metaKey . '">' . $metaValue . '</option>';
+        }
+    }
+    echo '</select>';
 }
+// Generate text input fields
+function wp_content_module_text_input($name, $class, $value) {
+    echo '<input class="' . $class . '" type="text" name="' . $name . '"  value="' . $value . '" />';
+}
+// Save All Metadata
+add_action("save_post", "wp_content_module_meta_save", 10, 3);
+function wp_content_module_meta_save($post_id, $post, $update) {
+    if (!isset($_POST["meta-box-nonce"]) || !wp_verify_nonce($_POST["meta-box-nonce"], basename(__FILE__)))
+        return $post_id;
+    if(!current_user_can("edit_post", $post_id))
+        return $post_id;
+    if(defined("DOING_AUTOSAVE") && DOING_AUTOSAVE)
+        return $post_id;
 
+    // If is not Content Module
+    if("module" != $post->post_type)
+        return $post_id;
 
+    // Get each meta option value
+    foreach($_POST as $key => $value) {
+        if (strpos($key, '_module_') === 0 && isset($key)) {
+
+            // Get meta value and sanatize
+            $userInput = sanitize_text_field($value);
+            // Update meta value in DB
+            update_post_meta($post_id, $key, $userInput);
+
+        }
+    }
+}
 // Dispaly shortcode to copy
 add_action( 'add_meta_boxes', 'add_module_output' );
 function add_module_output() {
@@ -311,8 +454,6 @@ function add_module_output() {
     	echo '<p><i>Copy this shortcode and paste it into any content type editor (ex. post or page)</i></p>';
     }
 }
-
-
 
 /************************************************************************************
 *** Module Shortcode
@@ -348,34 +489,35 @@ function module_insert_func( $atts, $content = null ) {
             ${$key} = $value[0];
         }
 	    // Module classes
-	    $module_classes = array('wp-module', $_cmb_module_width);
+	    $module_classes = array('wp-module', $_module_width);
 	    // OUTPUT HTML BELOW
 	    ?>
 
-	    <div id="module-<?php the_ID(); ?>" class="module-margin--<?php echo isset($_cmb_module_margin) ? $_cmb_module_margin : ''; ?> module-text--<?php echo isset($_cmb_module_text_color) ? $_cmb_module_text_color : ''; ?>">
-    	    <div <?php post_class($module_classes); //WP Post Classes ?>>
-                <div class="module-wallpaper" style="background:<?php echo isset($_cmb_module_background_color) ? $_cmb_module_background_color : '#ffffff'; ?>; <?php echo isset($_cmb_module_background_image) ? 'background: url(' . $_cmb_module_background_image . ')' : ''; ?>"></div>
+        <div id="module-<?php the_ID(); ?>" class="module-margin--<?php echo isset($_module_margin) ? $_module_margin : ''; ?> module-text--<?php echo isset($_module_text_color) ? $_module_text_color : ''; ?>">
+            <div <?php post_class($module_classes); //WP Post Classes ?>>
+                <div class="module-wallpaper" style="background:<?php echo isset($_module_background_color) ? $_module_background_color : '#ffffff;'; ?>; <?php if(has_post_thumbnail()) { echo 'background: url('; the_post_thumbnail_url(); echo ')'; } ?>"></div>
 
                 <?php
-    	        // If Video
-    	        if(isset($_cmb_module_background_video_source))  { ?>
+                // If Video
+                if(isset($_module_background_video_source) ? $_module_background_video_source != '' : null )  { ?>
                     <div class="module-video">
-                        <div class="video <?php echo $_cmb_module_background_video_source; ?>" data-id="<?php echo $_cmb_module_background_video; ?>"></div>
+                        <div class="video <?php echo $_module_background_video_source; ?>" data-id="<?php echo $_module_video_id; ?>"></div>
                     </div>
                 <?php } ?>
 
-                <div class="module-overlay" style="background:#<?php echo isset($_cmb_module_overlay_color_one) ? $_cmb_module_overlay_color_one : ''; ?>; background:linear-gradient(to <?php echo isset($_cmb_module_overlay_direction) ? $_cmb_module_overlay_direction : ''; ?>, <?php echo isset($_cmb_module_overlay_color_one) ? $_cmb_module_overlay_color_one : ''; ?>, <?php echo isset($_cmb_module_overlay_color_two) ? $_cmb_module_overlay_color_two : ''; ?>); opacity:.<?php echo isset($_cmb_module_overlay_opacity) ? $_cmb_module_overlay_opacity : ''; ?>;"></div>
+                <div class="module-overlay" style="background:<?php echo isset($_module_overlay_color_1) ? $_module_overlay_color_1 : ''; ?>; background:linear-gradient(to <?php echo isset($_module_overlay_direction) ? $_module_overlay_direction : ''; ?>, <?php echo isset($_module_overlay_color_1) ? $_module_overlay_color_1 : ''; ?>, <?php echo isset($_module_overlay_color_2) ? $_module_overlay_color_2 : ''; ?>); opacity:.<?php echo isset($_module_overlay_opacity) ? $_module_overlay_opacity : ''; ?>;"></div>
 
-    	        <div class="module-content <?php echo 'module-content--height-' . $_cmb_module_height . ' module-content--width-' . $_cmb_module_content_width; ?> ">
-    	            <?php the_content(); ?>
-    	        </div>
+                <div class="module-content <?php echo 'module-content--height-' . $_module_padding . ' module-content--width-' . $_module_content_width; ?> ">
+                    <?php the_content(); ?>
+                </div>
 
-    	    </div>
-	    </div>
+            </div>
+        </div>
 
 		<?php
 		// Reset Query
 		wp_reset_query();
+        // Reset Post Data
 		wp_reset_postdata();
 
 		// Clean output
@@ -384,7 +526,6 @@ function module_insert_func( $atts, $content = null ) {
 		return $content_module;
 	}
 }
-
 
 /************************************************************************************
 *** Javascript
@@ -399,6 +540,8 @@ function load_module_scripts() {
     global $post;
     // If is post, is module, and has shortcode [module]
     if( is_a( $post, 'WP_Post' ) && has_shortcode( $post->post_content, 'module') || get_post_type() === 'module' ) {
+
+    // Render script tags
     ?>
     <script src="https://www.youtube.com/iframe_api"></script>
     <script type="text/javascript">
@@ -470,7 +613,6 @@ function load_module_scripts() {
 
 <?php } }
 
-
 /************************************************************************************
 *** Single View (Preview)
 	Set custom single view template for Module post type.
@@ -498,4 +640,5 @@ function module_preview_template($single_template) {
 register_rest_field( 'module', 'metadata', array(
     'get_callback' => function ( $data ) {
         return get_post_meta( $data['id'], '', '' );
-    }, ));
+    }
+));
