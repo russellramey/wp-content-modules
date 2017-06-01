@@ -1,8 +1,8 @@
 <?php
 /**
 * Plugin Name: WP Content Modules
-* Plugin URI: http://russellramey.me/wordpress/wp-content-modules
-* Description: Build pages modularly. Create simple, repeateable, blocks of content that can be used anywhere with the generated [module] shortcode.
+* Plugin URI: https://github.com/russellramey/wp-content-modules
+* Description: Build pages modularly. Create simple, repeateable, blocks of content that can be used anywhere with the generated [module] shortcode. You can find more information about WP Content Moudles on github.
 * Version: 1.0
 * Author: Russell Ramey
 * Author URI: http://russellramey.me/
@@ -95,12 +95,6 @@ function content_module() {
 	);
 	register_post_type( 'module', $args );
 } // End register post type
-
-// Add description to defalut Feature Image metabox
-add_filter( 'admin_post_thumbnail_html', 'add_featured_image_instruction');
-function add_featured_image_instruction( $content ) {
-    return $content .= '<p>Add a backgound image for the module here. This image will also function as the fallback background for the video background option.</p>';
-}
 
 /************************************************************************************
 *** Module Metaboxes
@@ -363,6 +357,26 @@ function wp_content_module_background() {
                 </div>
             </div>
 
+            <!-- Module Text Color -->
+            <div class="wp-module--meta-field">
+                <div class="wp-module--meta-field-label">
+                    <p>Module Background Image Format</p>
+                </div>
+                <div class="wp-module--meta-field-input">
+                    <?php
+                        // Set dropdown options
+                        $image_format_options = array(
+                            "cover" => "Cover",
+                            "repeat" => "Repeat",
+                            "fixed" => "Fixed",
+                        );
+                        // Render dropdown options
+                        wp_content_module_select_input('_module_background_image_format', $image_format_options, isset($_module_background_image_format) ? $_module_background_image_format : null);
+                    ?>
+                    <p class="wp-module--meta-field-desc">Select the format for the module background image (if background image exists).<br />- <b>Cover</b> Background image will fill width and height of the moudle (default).<br>- <b>Repeat</b> Background image will repeat on both X and Y axis, best option for a texture background.<br> - <b>Fixed</b> Background image will fill width and hight of module, but will be fixed to the viewport (simple parrallax effect).</p>
+                </div>
+            </div>
+
             <!-- Module Video ID -->
             <div class="wp-module--meta-field">
                 <div class="wp-module--meta-field-label">
@@ -433,12 +447,10 @@ function wp_content_module_meta_save($post_id, $post, $update) {
     // Get each meta option value
     foreach($_POST as $key => $value) {
         if (strpos($key, '_module_') === 0 && isset($key)) {
-
             // Get meta value and sanatize
             $userInput = sanitize_text_field($value);
             // Update meta value in DB
             update_post_meta($post_id, $key, $userInput);
-
         }
     }
 }
@@ -495,7 +507,7 @@ function module_insert_func( $atts, $content = null ) {
 
         <div id="module-<?php the_ID(); ?>" class="module-margin--<?php echo isset($_module_margin) ? $_module_margin : ''; ?> module-text--<?php echo isset($_module_text_color) ? $_module_text_color : ''; ?>">
             <div <?php post_class($module_classes); //WP Post Classes ?>>
-                <div class="module-wallpaper" style="background:<?php echo isset($_module_background_color) ? $_module_background_color : '#ffffff;'; ?>; <?php if(has_post_thumbnail()) { echo 'background: url('; the_post_thumbnail_url(); echo ')'; } ?>"></div>
+                <div class="module-wallpaper module-wallpaper--<?php echo isset($_module_background_image_format) ? $_module_background_image_format : 'cover'; ?>" style="background:<?php echo isset($_module_background_color) ? $_module_background_color : '#ffffff;'; ?>; <?php if(has_post_thumbnail()) { echo 'background: url('; the_post_thumbnail_url(); echo ')'; } ?>"></div>
 
                 <?php
                 // If Video

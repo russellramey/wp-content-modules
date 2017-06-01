@@ -107,8 +107,25 @@
 }
 .module-wallpaper{
     background-position: center center !important;
-    background-size: cover !important;
 	z-index: 0;
+}
+.module-wallpaper--cover{
+	background-size: cover !important;
+	-webkit-background-size: cover !important;
+	-moz-background-size: cover !important;
+	-o-background-size: cover !important;
+	-ms-background-size: cover !important;
+}
+.module-wallpaper--repeat{
+	background-repeat: repeat;
+}
+.module-wallpaper--fixed{
+	background-size: cover !important;
+	-webkit-background-size: cover !important;
+	-moz-background-size: cover !important;
+	-o-background-size: cover !important;
+	-ms-background-size: cover !important;
+	background-attachment: fixed !important;
 }
 /* Module video background */
 .module-video {
