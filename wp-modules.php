@@ -160,7 +160,7 @@ function wp_content_module_setup() {
                     // Render dropdown options
                     wp_content_module_select_input('_module_content_width', $content_width_options, isset($_module_content_width) ? $_module_content_width : null);
                 ?>
-                <p class="wp-module--meta-field-desc">Option to set the width of the inner content within the module<br />- Auto (Module content will fill same width as "Module Outer Width" above)<br />- Small (Module content max width of 768px)<br />- Medium (Module content max width of 960px)<br />- Large (Module content max width of 1280px)<br />- X Large (Module content max width of 1440px)</p>
+                <p class="wp-module--meta-field-desc">Option to set the width of the inner content within the module<br />- <b>Auto</b> (Module content will fill same width as "Module Outer Width" above)<br />- <b>Small</b> (Module content max width of 768px)<br />- <b>Medium</b> (Module content max width of 960px)<br />- <b>Large</b> (Module content max width of 1280px)<br />- <b>X Large</b> (Module content max width of 1440px)</p>
             </div>
         </div>
 
@@ -373,7 +373,7 @@ function wp_content_module_background() {
                         // Render dropdown options
                         wp_content_module_select_input('_module_background_image_format', $image_format_options, isset($_module_background_image_format) ? $_module_background_image_format : null);
                     ?>
-                    <p class="wp-module--meta-field-desc">Select the format for the module background image (if background image exists).<br />- <b>Cover</b> Background image will fill width and height of the moudle (default).<br>- <b>Repeat</b> Background image will repeat on both X and Y axis, best option for a texture background.<br> - <b>Fixed</b> Background image will fill width and hight of module, but will be fixed to the viewport (simple parrallax effect).</p>
+                    <p class="wp-module--meta-field-desc">Select the format for the module background image (if background image exists).<br />- <b>Cover</b> (background image will fill width and height of the moudle (default)).<br>- <b>Repeat</b> (background image will repeat on both X and Y axis, best option for a texture background)<br> - <b>Fixed</b> (background image will fill width and hight of module, but will be fixed to the viewport (simple parrallax effect))</p>
                 </div>
             </div>
 
