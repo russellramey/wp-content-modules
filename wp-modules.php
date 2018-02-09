@@ -111,7 +111,7 @@ function wp_content_module_setup() {
     // Markup
     function wp_content_module_setup_markup() {
         // WP Nonce Hook (required)
-        wp_nonce_field(basename(__FILE__), "meta-box-nonce");
+        wp_nonce_field(basename(__FILE__), "_wp_content_module-nonce");
 
         // Get all available or previsouly set meta data
         $meta = get_post_meta(get_the_ID());
@@ -239,7 +239,7 @@ function wp_content_module_overlay() {
     // Markup
     function wp_content_module_overlay_markup() {
         // WP Nonce Hook (required)
-        wp_nonce_field(basename(__FILE__), "meta-box-nonce");
+        wp_nonce_field(basename(__FILE__), "_wp_content_module_nonce");
 
         // Get all available or previsouly set meta data
         $meta = get_post_meta(get_the_ID());
@@ -433,12 +433,17 @@ function wp_content_module_text_input($name, $class, $value) {
 // Save All Metadata
 add_action("save_post", "wp_content_module_meta_save", 10, 3);
 function wp_content_module_meta_save($post_id, $post, $update) {
-    if (!isset($_POST["meta-box-nonce"]) || !wp_verify_nonce($_POST["meta-box-nonce"], basename(__FILE__)))
+    
+    // Check WP Nonce (required)
+    if (!isset($_POST["_wp_content_module_nonce"]) || !wp_verify_nonce($_POST["_wp_content_module_nonce"], basename(__FILE__))){
         return $post_id;
-    if(!current_user_can("edit_post", $post_id))
+    }
+    if(!current_user_can("edit_post", $post_id)){
         return $post_id;
-    if(defined("DOING_AUTOSAVE") && DOING_AUTOSAVE)
+    }
+    if(defined("DOING_AUTOSAVE") && DOING_AUTOSAVE){
         return $post_id;
+    }
 
     // If is not Content Module
     if("module" != $post->post_type)
