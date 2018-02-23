@@ -3,7 +3,7 @@
 * Plugin Name: WP Content Modules
 * Plugin URI: https://github.com/russellramey/wp-content-modules
 * Description: Build pages modularly. Create simple, repeateable, blocks of content that can be used anywhere with the generated [module] shortcode. You can find more information about WP Content Moudles on github.
-* Version: 1.0
+* Version: 1.1
 * Author: Russell Ramey
 * Author URI: http://russellramey.me/
 */
