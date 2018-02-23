@@ -21,13 +21,13 @@
     }
 
     // Module classes
-    $module_classes = array('wp-module', $_module_width);
+    $module_classes = array('wp-module', isset($_module_width) ? $_module_width : 'wp-module--auto');
     // OUTPUT HTML BELOW
     ?>
 
-    <div id="module-<?php the_ID(); ?>" class="module-margin--<?php echo isset($_module_margin) ? $_module_margin : ''; ?> module-text--<?php echo isset($_module_text_color) ? $_module_text_color : ''; ?>">
+    <div id="module-<?php the_ID(); ?>" class="<?php echo isset($_module_margin) ? $_module_margin : null; ?> <?php echo isset($_module_text_color) ? $_module_text_color : null; ?>">
         <div <?php post_class($module_classes); //WP Post Classes ?>>
-            <div class="module-wallpaper module-wallpaper--<?php echo isset($_module_background_image_format) ? $_module_background_image_format : 'cover'; ?>" style="background:<?php echo isset($_module_background_color) ? $_module_background_color : '#ffffff;'; ?>; <?php if(has_post_thumbnail()) { echo 'background: url('; the_post_thumbnail_url(); echo ')'; } ?>"></div>
+            <div class="module-wallpaper <?php echo isset($_module_background_image_format) ? $_module_background_image_format : null; ?>" style="background:<?php echo isset($_module_background_color) ? $_module_background_color : '#ffffff;'; ?>; <?php if(get_the_post_thumbnail_url($module->ID)) { echo 'background: url(' . get_the_post_thumbnail_url($module->ID) . ')'; } ?>"></div>
 
             <?php
             // If Video
@@ -38,8 +38,8 @@
             <?php } ?>
 
             <div class="module-overlay" style="background:<?php echo isset($_module_overlay_color_1) ? $_module_overlay_color_1 : ''; ?>; background:linear-gradient(to <?php echo isset($_module_overlay_direction) ? $_module_overlay_direction : ''; ?>, <?php echo isset($_module_overlay_color_1) ? $_module_overlay_color_1 : ''; ?>, <?php echo isset($_module_overlay_color_2) ? $_module_overlay_color_2 : ''; ?>); opacity:.<?php echo isset($_module_overlay_opacity) ? $_module_overlay_opacity : ''; ?>;"></div>
-
-            <div class="module-content <?php echo 'module-content--height-' . $_module_padding . ' module-content--width-' . $_module_content_width; ?> ">
+            
+            <div class="module-content <?php echo isset($_module_padding) ? $_module_padding : null; ?> <?php echo isset($_module_content_width) ? $_module_content_width : null; ?>">
                 <?php the_content(); ?>
             </div>
 

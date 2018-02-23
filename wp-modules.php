@@ -132,7 +132,7 @@ function wp_content_module_setup() {
                 <?php
                     // Set dropdown options
                     $width_options = array(
-                        "wp-module--auto" => "Auto",
+                        null => "Auto",
                         "wp-module--full" => "Full Width",
                     );
                     // Render dropdown options
@@ -151,11 +151,11 @@ function wp_content_module_setup() {
                 <?php
                     // Set dropdown options
                     $content_width_options = array(
-                        "auto" => "Auto",
-                        "small" => "Small (768px)",
-                        "medium" => "Medium (960px)",
-                        "large" => "Large (1170px)",
-                        "xlarge" => "X Large (1440px)",
+                        null => "Auto",
+                        "module-content--width-small" => "Small (768px)",
+                        "module-content--width-medium" => "Medium (960px)",
+                        "module-content--width-large" => "Large (1170px)",
+                        "module-content--width-xlarge" => "X Large (1440px)",
                     );
                     // Render dropdown options
                     wp_content_module_select_input('_module_content_width', $content_width_options, isset($_module_content_width) ? $_module_content_width : null);
@@ -173,12 +173,12 @@ function wp_content_module_setup() {
                 <?php
                     // Set dropdown options
                     $padding_options = array(
-                        "auto" => "Auto",
-                        "small" => "Small (40px)",
-                        "medium" => "Medium (80px)",
-                        "large" => "Large (120px)",
-                        "xlarge" => "Larger (160px)",
-                        "xxlarge" => "Largest (200px)",
+                        null => "Auto",
+                        "module-content--height-small" => "Small (40px)",
+                        "module-content--height-medium" => "Medium (80px)",
+                        "module-content--height-large" => "Large (120px)",
+                        "module-content--height-xlarge" => "Larger (160px)",
+                        "module-content--height-xxlarge" => "Largest (200px)",
                     );
                     // Render dropdown options
                     wp_content_module_select_input('_module_padding', $padding_options, isset($_module_padding) ? $_module_padding : null);
@@ -196,10 +196,10 @@ function wp_content_module_setup() {
                 <?php
                     // Set dropdown options
                     $margin_options = array(
-                        "none" => "None",
-                        "small" => "Small (40px)",
-                        "medium" => "Medium (80px)",
-                        "large" => "Large (120px)",
+                        null => "None",
+                        "module-margin--small" => "Small (40px)",
+                        "module-margin--medium" => "Medium (80px)",
+                        "module-margin--large" => "Large (120px)",
                     );
                     // Render dropdown options
                     wp_content_module_select_input('_module_margin', $margin_options, isset($_module_margin) ? $_module_margin : null);
@@ -217,8 +217,9 @@ function wp_content_module_setup() {
                 <?php
                     // Set dropdown options
                     $color_options = array(
-                        "black" => "Dark",
-                        "white" => "Light",
+                        null => "Auto",
+                        "module-text--black" => "Dark",
+                        "module-text--white" => "Light",
                     );
                     // Render dropdown options
                     wp_content_module_select_input('_module_text_color', $color_options, isset($_module_text_color) ? $_module_text_color : null);
@@ -311,6 +312,7 @@ function wp_content_module_overlay() {
                     <?php
                         // Set dropdown options
                         $direction_options = array(
+                            null => "Auto",
                             "left" => "Left",
                             "right" => "Right",
                             "top" => "Top",
@@ -366,9 +368,10 @@ function wp_content_module_background() {
                     <?php
                         // Set dropdown options
                         $image_format_options = array(
-                            "cover" => "Cover",
-                            "repeat" => "Repeat",
-                            "fixed" => "Fixed",
+                            null => "Auto",
+                            "module-wallpaper--cover" => "Cover",
+                            "module-wallpaper--repeat" => "Repeat",
+                            "module-wallpaper--fixed" => "Fixed",
                         );
                         // Render dropdown options
                         wp_content_module_select_input('_module_background_image_format', $image_format_options, isset($_module_background_image_format) ? $_module_background_image_format : null);
@@ -399,8 +402,8 @@ function wp_content_module_background() {
                         // Set dropdown options
                         $video_options = array(
                             null => 'None',
-                            "youtube" => "YouTube",
-                            "vimeo" => "Vimeo",
+                            "video-source--youtube" => "YouTube",
+                            "video-source--vimeo" => "Vimeo",
                         );
                         // Render dropdown options
                         wp_content_module_select_input('_module_background_video_source', $video_options, isset($_module_background_video_source) ? $_module_background_video_source : null);
@@ -452,10 +455,18 @@ function wp_content_module_meta_save($post_id, $post, $update) {
     // Get each meta option value
     foreach($_POST as $key => $value) {
         if (strpos($key, '_module_') === 0 && isset($key)) {
-            // Get meta value and sanatize
-            $userInput = sanitize_text_field($value);
-            // Update meta value in DB
-            update_post_meta($post_id, $key, $userInput);
+
+            // If value is not empty
+            if ($value != ''){
+                // Get meta value and sanatize
+                $userInput = sanitize_text_field($value);
+                // Update meta value in DB
+                update_post_meta($post_id, $key, $userInput);
+            } else {
+                // If empty, delete the meta.
+                delete_post_meta($post_id, $key);
+            }
+
         }
     }
 }
@@ -467,7 +478,7 @@ function add_module_output() {
     // The Event Location Metabox
     function module_output_code() {
     	global $post;
-    	echo '<p style="font-size:16px;">[module title="' . $post->post_name  . '"]</p>';
+    	echo '<p style="font-size:16px;">[module title="' . $post->post_name  . '" id="' . $post->ID . '"]</p>';
     	echo '<p><i>Copy this shortcode and paste it into any content type editor (ex. post or page)</i></p>';
     }
 }
@@ -482,7 +493,8 @@ function add_module_output() {
 add_shortcode( 'module', 'module_insert_func' );
 function module_insert_func( $atts, $content = null ) {
 	extract( shortcode_atts( array(
-		'title' => ''
+		'title' => '',
+        'id' => ''
 	), $atts )); ob_start(); ?>
 
 		<?php
@@ -493,26 +505,28 @@ function module_insert_func( $atts, $content = null ) {
 				'posts_per_page' => 1
 			);
 		// Get new query
-		$module = new WP_Query($module_args);
+		$modules = get_posts($module_args);
 		// If module found
-		if($module->have_posts()) {
-		$module->the_post();
+		if($modules) {
+		// Get the module
+        foreach ($modules as $module) : setup_postdata( $module );
 
+        
 
         // Get all meta data
-        $meta = get_post_meta(get_the_ID());
+        $meta = get_post_meta($module->ID);
         // For each entry get the value if available
         foreach ( $meta as $key => $value ) {
             ${$key} = $value[0];
         }
 	    // Module classes
-	    $module_classes = array('wp-module', $_module_width);
+	    $module_classes = array('wp-module', isset($_module_width) ? $_module_width : 'wp-module--auto');
 	    // OUTPUT HTML BELOW
 	    ?>
 
-        <div id="module-<?php the_ID(); ?>" class="module-margin--<?php echo isset($_module_margin) ? $_module_margin : ''; ?> module-text--<?php echo isset($_module_text_color) ? $_module_text_color : ''; ?>">
+        <div id="module-<?php the_ID(); ?>" class="<?php echo isset($_module_margin) ? $_module_margin : null; ?> <?php echo isset($_module_text_color) ? $_module_text_color : null; ?>">
             <div <?php post_class($module_classes); //WP Post Classes ?>>
-                <div class="module-wallpaper module-wallpaper--<?php echo isset($_module_background_image_format) ? $_module_background_image_format : 'cover'; ?>" style="background:<?php echo isset($_module_background_color) ? $_module_background_color : '#ffffff;'; ?>; <?php if(has_post_thumbnail()) { echo 'background: url('; the_post_thumbnail_url(); echo ')'; } ?>"></div>
+                <div class="module-wallpaper <?php echo isset($_module_background_image_format) ? $_module_background_image_format : null; ?>" style="background:<?php echo isset($_module_background_color) ? $_module_background_color : '#ffffff;'; ?>; <?php if(get_the_post_thumbnail_url($module->ID)) { echo 'background: url(' . get_the_post_thumbnail_url($module->ID) . ')'; } ?>"></div>
 
                 <?php
                 // If Video
@@ -523,8 +537,8 @@ function module_insert_func( $atts, $content = null ) {
                 <?php } ?>
 
                 <div class="module-overlay" style="background:<?php echo isset($_module_overlay_color_1) ? $_module_overlay_color_1 : ''; ?>; background:linear-gradient(to <?php echo isset($_module_overlay_direction) ? $_module_overlay_direction : ''; ?>, <?php echo isset($_module_overlay_color_1) ? $_module_overlay_color_1 : ''; ?>, <?php echo isset($_module_overlay_color_2) ? $_module_overlay_color_2 : ''; ?>); opacity:.<?php echo isset($_module_overlay_opacity) ? $_module_overlay_opacity : ''; ?>;"></div>
-
-                <div class="module-content <?php echo 'module-content--height-' . $_module_padding . ' module-content--width-' . $_module_content_width; ?> ">
+                
+                <div class="module-content <?php echo isset($_module_padding) ? $_module_padding : null; ?> <?php echo isset($_module_content_width) ? $_module_content_width : null; ?>">
                     <?php the_content(); ?>
                 </div>
 
@@ -532,10 +546,10 @@ function module_insert_func( $atts, $content = null ) {
         </div>
 
 		<?php
-		// Reset Query
-		wp_reset_query();
-        // Reset Post Data
-		wp_reset_postdata();
+		
+        // End Loop, Reset Post Data
+		endforeach; 
+        wp_reset_postdata();
 
 		// Clean output
 		$content_module = ob_get_clean();
@@ -564,7 +578,7 @@ function load_module_scripts() {
     <script type="text/javascript">
         function onYouTubeIframeAPIReady() {
             // Get list of all player containers
-            var players = document.querySelectorAll('.youtube');
+            var players = document.querySelectorAll('.video-source--youtube');
             // For each player, create YT player
             for (var p = 0; p < players.length; p++){
                 // New player
@@ -609,7 +623,7 @@ function load_module_scripts() {
     <script src="https://player.vimeo.com/api/player.js"></script>
     <script>
         // Get list of all player containers
-        var players = document.querySelectorAll('.vimeo');
+        var players = document.querySelectorAll('.video-source--vimeo');
         // For each player found
         for (var p = 0; p < players.length; p++){
             // Set player options
