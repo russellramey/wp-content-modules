@@ -569,8 +569,10 @@ add_action( 'wp_footer', 'load_module_scripts' );
 function load_module_scripts() {
     // Global posts
     global $post;
+    // Get meta, convert to string
+    $post_meta = json_encode(get_post_meta($post->ID));
     // If is post, is module, and has shortcode [module]
-    if( is_a( $post, 'WP_Post' ) && has_shortcode( $post->post_content, 'module') || get_post_type() === 'module' ) {
+    if( is_a( $post, 'WP_Post' ) && has_shortcode( $post->post_content, 'module') || has_shortcode($post_meta, 'module') || get_post_type() === 'module' ) {
 
     // Render script tags
     ?>
