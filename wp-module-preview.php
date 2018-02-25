@@ -27,7 +27,7 @@
 
     <div id="module-<?php the_ID(); ?>" class="<?php echo isset($_module_margin) ? $_module_margin : null; ?> <?php echo isset($_module_text_color) ? $_module_text_color : null; ?>">
         <div <?php post_class($module_classes); //WP Post Classes ?>>
-            <div class="module-wallpaper <?php echo isset($_module_background_image_format) ? $_module_background_image_format : null; ?>" style="background:<?php echo isset($_module_background_color) ? $_module_background_color : '#ffffff;'; ?>; <?php if(get_the_post_thumbnail_url($module->ID)) { echo 'background: url(' . get_the_post_thumbnail_url($module->ID) . ')'; } ?>"></div>
+            <div class="module-wallpaper <?php echo isset($_module_background_image_format) ? $_module_background_image_format : null; ?>" style="background:<?php echo isset($_module_background_color) ? $_module_background_color : '#ffffff;'; ?>; <?php if(get_the_post_thumbnail_url($post->ID)) { echo 'background: url(' . get_the_post_thumbnail_url($post->ID) . ')'; } ?>"></div>
 
             <?php
             // If Video
