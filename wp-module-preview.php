@@ -33,7 +33,7 @@
             // If Video
             if(isset($_module_background_video_source) ? $_module_background_video_source != '' : null )  { ?>
                 <div class="module-video">
-                    <div class="video <?php echo $_module_background_video_source; ?>" data-id="<?php echo $_module_video_id; ?>"></div>
+                    <div id="video-<?php echo $_module_video_id; ?>" class="video <?php echo $_module_background_video_source; ?>" data-id="<?php echo $_module_video_id; ?>"></div>
                 </div>
             <?php } ?>
 
